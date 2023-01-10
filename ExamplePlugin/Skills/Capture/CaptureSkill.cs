@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using VoidJailerMod.Effects;
 using VoidJailerMod.Skills.Spike;
 
 namespace VoidJailerMod.Skills.Capture {
@@ -28,7 +29,7 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public override void FixedUpdate() {
 			base.FixedUpdate();
-			if (isAuthority && fixedAge >= duration) {
+			if (isAuthority && fixedAge >= duration && isAuthority) {
 				Log.LogTrace($"Transitioning into a new instance of {nameof(CaptureCommonPullSequence)}!");
 				outer.SetNextState(new CaptureCommonPullSequence());
 			}
@@ -63,9 +64,9 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public static string EnterSoundString => EntityStates.VoidJailer.Weapon.ChargeCapture.enterSoundString;
 
-		public static GameObject ChargeEffectPrefab => EntityStates.VoidJailer.Weapon.ChargeCapture.chargeEffectPrefab;
+		public static GameObject ChargeEffectPrefab => EffectProvider.ChargeTetherEffect;//EntityStates.VoidJailer.Weapon.ChargeCapture.chargeEffectPrefab;
 
-		public static GameObject AttackIndicatorPrefab => EntityStates.VoidJailer.Weapon.ChargeCapture.attackIndicatorPrefab;
+		public static GameObject AttackIndicatorPrefab => EffectProvider.TetherAttackIndicatorEffect;//EntityStates.VoidJailer.Weapon.ChargeCapture.attackIndicatorPrefab;
 
 		public static string MuzzleString => EntityStates.VoidJailer.Weapon.ChargeCapture.muzzleString;
 

@@ -58,8 +58,7 @@ namespace VoidJailerMod.Survivor {
 
 			GameObject playerBodyPrefab = ROR2ObjectCreator.CreateBody("VoidJailerSurvivor", "RoR2/DLC1/VoidJailer/VoidJailerBody.prefab");
 			GameObject playerBodyLocator = PrefabAPI.InstantiateClone(playerBodyPrefab.GetComponent<ModelLocator>().modelBaseTransform.gameObject, "PlayerJailerBodyDisplay");
-			NetworkIdentity id = playerBodyLocator.AddComponent<NetworkIdentity>();
-			id.ClearClientOwner();
+			playerBodyLocator.AddComponent<NetworkIdentity>();
 
 			#region Body / Stats
 			CharacterBody body = playerBodyPrefab.GetComponent<CharacterBody>();

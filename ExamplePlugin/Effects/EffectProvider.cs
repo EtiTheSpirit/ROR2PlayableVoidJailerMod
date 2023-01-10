@@ -16,9 +16,22 @@ namespace VoidJailerMod.Effects {
 		/// </summary>
 		public static GameObject SilentVoidCritDeathEffect { get; private set; }
 
+		/// <summary>
+		/// The crunchy explode effect on Collapse.
+		/// </summary>
 		public static GameObject CollapseExplode { get; private set; }
 
+
+		public static GameObject SpawnEffect { get; private set; }
+
+		/// <summary>
+		/// The muzzle flash for the primary attack.
+		/// </summary>
 		public static GameObject SpikeMuzzleFlash { get; private set; }
+
+		public static GameObject ChargeTetherEffect { get; private set; }
+
+		public static GameObject TetherAttackIndicatorEffect { get; private set; }
 
 		internal static void Init() {
 			On.RoR2.HealthComponent.AssetReferences.Resolve += InterceptHealthCmpAssetReferences;
@@ -28,6 +41,15 @@ namespace VoidJailerMod.Effects {
 
 			Log.LogTrace("Creating muzzle flash effect for Spike...");
 			SpikeMuzzleFlash = CreateNetworkedCloneFromPath("RoR2/DLC1/VoidJailer/VoidJailerDartMuzzleFlash.prefab", "VoidJailerSurvivorDartMuzzleFlash");
+
+			Log.LogTrace("Creating spawn effect...");
+			SpawnEffect = CreateNetworkedCloneFromPath("RoR2/DLC1/VoidJailer/VoidJailerSpawnEffect.prefab", "VoidJailerSpawn");
+
+			Log.LogTrace("Creating tether charge effect...");
+			ChargeTetherEffect = CreateNetworkedCloneFromPath("RoR2/DLC1/VoidJailer/VoidJailerCaptureCharge.prefab", "VoidJailerTetherCharge");
+
+			Log.LogTrace("Creating tether attack indicator effect...");
+			TetherAttackIndicatorEffect = CreateNetworkedCloneFromPath("RoR2/DLC1/VoidJailer/VoidJailerCaptureAttackIndicator.prefab", "VoidJailerTetherIndicator");
 
 			Log.LogTrace("Effect init complete.");
 		}

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using VoidJailerMod.Effects;
 
 namespace VoidJailerMod.Skills.Spawn {
 	public class SpawnState : GenericCharacterSpawnState {
@@ -14,16 +15,14 @@ namespace VoidJailerMod.Skills.Spawn {
 		}
 
 		private void PlaySpawnFX() {
-			if (spawnFXPrefab != null && !string.IsNullOrEmpty(spawnFXTransformName)) {
-				EffectManager.SimpleMuzzleFlash(spawnFXPrefab, gameObject, spawnFXTransformName, false);
+			if (!string.IsNullOrEmpty(spawnFXTransformName)) {
+				EffectManager.SimpleMuzzleFlash(EffectProvider.SpawnEffect, gameObject, spawnFXTransformName, false);
 			}
 		}
 
 		private void GrantSpawnAnimationImmunity(float duration) {
 			if (isAuthority) characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, duration);
 		}
-
-		public static GameObject spawnFXPrefab => EntityStates.VoidJailer.SpawnState.spawnFXPrefab;
 
 		public static string spawnFXTransformName => EntityStates.VoidJailer.SpawnState.spawnFXTransformName;
 	}

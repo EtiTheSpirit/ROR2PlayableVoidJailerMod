@@ -22,7 +22,7 @@ namespace VoidJailerMod.Skills.Death {
 			muzzleTransform = FindModelChild(MuzzleName);
 			if (muzzleTransform && isAuthority) {
 				FireProjectileInfo fireProjectileInfo = default;
-				fireProjectileInfo.projectilePrefab = DeathBombProjectile;
+				fireProjectileInfo.projectilePrefab = ProjectileProvider.ExaggeratedDeathBombProjectile;
 				fireProjectileInfo.position = muzzleTransform.position;
 				fireProjectileInfo.rotation = Quaternion.LookRotation(characterDirection.forward, Vector3.up);
 				fireProjectileInfo.owner = gameObject;
@@ -46,18 +46,6 @@ namespace VoidJailerMod.Skills.Death {
 			DestroyModel();
 			base.OnExit();
 		}
-
-		public static GameObject DeathBombProjectile {
-			get {
-				if (_deathBombProjectile == null) {
-					_deathBombProjectile = PrefabAPI.InstantiateClone(EntityStates.VoidJailer.DeathState.deathBombProjectile, "ExaggeratedVoidJailerDeathBomb");
-					ModdedDamageTypeHolderComponent holder = _deathBombProjectile.AddComponent<ModdedDamageTypeHolderComponent>();
-					holder.Add(DamageTypeProvider.PerformsFakeVoidDeath);
-				}
-				return _deathBombProjectile;
-			}
-		}
-		private static GameObject _deathBombProjectile = null;
 
 		// Token: 0x040006FE RID: 1790
 		public static float Duration => EntityStates.VoidJailer.DeathState.duration;
