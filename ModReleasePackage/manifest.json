@@ -1,0 +1,17 @@
+﻿{
+	"name": "VoidJailerPlayerCharacter",
+	"version_number": "1.0.1",
+	"website_url": "",
+	"description": "This is a public test build, some features are missing (i.e. icons)! Allows the player to play as a Void Jailer. Go feed a bottom you bottom feeder.",
+	"dependencies": [
+		"bbepis-BepInExPack-5.4.9",
+		"RiskofThunder-HookGenPatcher-1.2.3",
+		"RiskofThunder-R2API_Core-5.0.4",
+		"RiskofThunder-R2API_ContentManagement-1.0.1",
+		"RiskofThunder-R2API_Prefab-1.0.1",
+		"RiskofThunder-R2API_DamageType-1.0.0",
+		"RiskofThunder-R2API_Language-1.0.0",
+		"RiskofThunder-R2API_Loadout-1.0.0",
+		"Xan-HPBarAPI-2.0.0"
+	]
+}
