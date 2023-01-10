@@ -157,6 +157,8 @@ namespace VoidJailerMod
 			Bind(BUFF_PLAYERVOIDJAILER_FURY_NAME, "Fury");
 			Bind(BUFF_PLAYERVOIDJAILER_FURY_DESC, commonSpecialStatDesc);
 			#endregion
+
+			Log.LogTrace("Localization initialized.");
 		}
 
 		// TO SELF: The idea was that Void figured out survivors killed Providence, they want to take Mithrix, suspect the survivors are strong enough to do that too and so they try to work with the players

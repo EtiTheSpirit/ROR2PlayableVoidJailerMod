@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using VoidJailerMod.Skills.Spike;
 
 namespace VoidJailerMod.Skills.Capture {
 	public class CaptureSkill : BaseState {
@@ -28,6 +29,7 @@ namespace VoidJailerMod.Skills.Capture {
 		public override void FixedUpdate() {
 			base.FixedUpdate();
 			if (isAuthority && fixedAge >= duration) {
+				Log.LogTrace($"Transitioning into a new instance of {nameof(CaptureCommonPullSequence)}!");
 				outer.SetNextState(new CaptureCommonPullSequence());
 			}
 		}

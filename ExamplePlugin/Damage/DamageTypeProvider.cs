@@ -15,9 +15,13 @@ namespace VoidJailerMod.Damage {
 		public static ModdedDamageType PerformsFastFracture { get; private set; }
 
 		internal static void Init() {
+			Log.LogTrace("Creating NullBoosted Damage Type...");
 			NullBoosted = ReserveDamageType();
+			Log.LogTrace("Creating PerformsFakeVoidDeath Damage Type...");
 			PerformsFakeVoidDeath = ReserveDamageType();
+			Log.LogTrace("Creating PerformsFastFracture Damage Type...");
 			PerformsFastFracture = ReserveDamageType();
+			Log.LogTrace("Damage Types initialized.");
 		}
 
 	}

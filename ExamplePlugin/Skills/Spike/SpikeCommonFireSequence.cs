@@ -11,23 +11,14 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
+using VoidJailerMod.Effects;
 
 namespace VoidJailerMod.Skills.Spike {
 	public class SpikeCommonFireSequence : GenericProjectileBaseState {
 		
-		public static GameObject MuzzleFlash {
-			get {
-				if (_muzzleFlash == null) {
-					_muzzleFlash = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidJailer/VoidJailerDartMuzzleFlash.prefab").WaitForCompletion();
-				}
-				return _muzzleFlash;
-			}
-		}
-		private static GameObject _muzzleFlash = null;
-
 		public SpikeCommonFireSequence() {
 			// projectilePrefab = ProjectileProvider.SpikeDart;
-			effectPrefab = MuzzleFlash;
+			effectPrefab = EffectProvider.SpikeMuzzleFlash;
 			attackSoundString = "Play_voidJailer_m1_shoot";
 			damageCoefficient = Configuration.BasePrimaryDamage;
 			bloom = 1;

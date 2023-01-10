@@ -18,16 +18,34 @@ namespace VoidJailerMod.Effects {
 
 		public static GameObject CollapseExplode { get; private set; }
 
+		public static GameObject SpikeMuzzleFlash { get; private set; }
+
 		internal static void Init() {
 			On.RoR2.HealthComponent.AssetReferences.Resolve += InterceptHealthCmpAssetReferences;
-			CollapseExplode = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/BleedOnHitVoid/FractureImpactEffect.prefab").WaitForCompletion(), "FastFractureImpactEffect");
-			ContentAddition.AddEffect(CollapseExplode);
+
+			Log.LogTrace("Creating Collapse explode effect...");
+			CollapseExplode = CreateNetworkedCloneFromPath("RoR2/DLC1/BleedOnHitVoid/FractureImpactEffect.prefab", "FastFractureImpactEffect");
+
+			Log.LogTrace("Creating muzzle flash effect for Spike...");
+			SpikeMuzzleFlash = CreateNetworkedCloneFromPath("RoR2/DLC1/VoidJailer/VoidJailerDartMuzzleFlash.prefab", "VoidJailerSurvivorDartMuzzleFlash");
+
+			Log.LogTrace("Effect init complete.");
+		}
+
+		private static GameObject CreateNetworkedCloneFromPath(string path, string newName) {
+			Log.LogTrace($"Duplicating {path} as {newName}...");
+			GameObject o = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(path).WaitForCompletion(), newName);
+			Log.LogTrace("Adding a network identity...");
+			o.AddComponent<NetworkIdentity>();
+			Log.LogTrace("Registering...");
+			ContentAddition.AddEffect(o);
+			Log.LogTrace("Done.");
+			return o;
 		}
 
 		private static void InterceptHealthCmpAssetReferences(On.RoR2.HealthComponent.AssetReferences.orig_Resolve originalMethod) {
 			originalMethod();
-
-			SilentVoidCritDeathEffect = PrefabAPI.InstantiateClone(HealthComponent.AssetReferences.critGlassesVoidExecuteEffectPrefab, "SilentVoidCritDeath");
+			SilentVoidCritDeathEffect = PrefabAPI.InstantiateClone(HealthComponent.AssetReferences.critGlassesVoidExecuteEffectPrefab, "SilentVoidCritDeathJailer");
 			SilentVoidCritDeathEffect.AddComponent<NetworkIdentity>();
 			EffectComponent fx = SilentVoidCritDeathEffect.GetComponentInChildren<EffectComponent>();
 			fx.soundName = null;

@@ -6,11 +6,8 @@ using RoR2;
 using RoR2.Skills;
 using ROR2HPBarAPI.API;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.XR;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
@@ -26,47 +23,47 @@ using Interactor = RoR2.Interactor;
 namespace VoidJailerMod.Survivor {
 	public class VoidJailerSurvivor {
 
-		// TODO: Leave this public?
-		public static CharacterBody BodyTemplate { get; private set; }
-
 		public static SurvivorDef Jailer { get; private set; }
 
 		// TODO: Try to allow runtime edits by using one of the popular settings mods?
 		// Why can't this be like MelonLoader where settings are just exposed out of the box
-		public static void UpdateSettings() {
+		public static void UpdateSettings(CharacterBody body) {
 			Log.LogTrace("Updating body settings...");
-			BodyTemplate.baseMaxHealth = Configuration.BaseMaxHealth;
-			BodyTemplate.levelMaxHealth = Configuration.LevelMaxHealth;
-			BodyTemplate.baseMaxShield = Configuration.BaseMaxShield;
-			BodyTemplate.levelMaxShield = Configuration.LevelMaxShield;
-			BodyTemplate.baseArmor = Configuration.BaseArmor;
-			BodyTemplate.levelArmor = Configuration.LevelArmor;
-			BodyTemplate.baseRegen = Configuration.BaseHPRegen;
-			BodyTemplate.levelRegen = Configuration.LevelHPRegen;
+			body.baseMaxHealth = Configuration.BaseMaxHealth;
+			body.levelMaxHealth = Configuration.LevelMaxHealth;
+			body.baseMaxShield = Configuration.BaseMaxShield;
+			body.levelMaxShield = Configuration.LevelMaxShield;
+			body.baseArmor = Configuration.BaseArmor;
+			body.levelArmor = Configuration.LevelArmor;
+			body.baseRegen = Configuration.BaseHPRegen;
+			body.levelRegen = Configuration.LevelHPRegen;
 
-			BodyTemplate.baseDamage = Configuration.BaseDamage;
-			BodyTemplate.levelDamage = Configuration.LevelDamage;
-			BodyTemplate.baseAttackSpeed = Configuration.BaseAttackSpeed;
-			BodyTemplate.levelAttackSpeed = Configuration.LevelAttackSpeed;
-			BodyTemplate.baseCrit = Configuration.BaseCritChance;
-			BodyTemplate.levelCrit = Configuration.LevelCritChance;
+			body.baseDamage = Configuration.BaseDamage;
+			body.levelDamage = Configuration.LevelDamage;
+			body.baseAttackSpeed = Configuration.BaseAttackSpeed;
+			body.levelAttackSpeed = Configuration.LevelAttackSpeed;
+			body.baseCrit = Configuration.BaseCritChance;
+			body.levelCrit = Configuration.LevelCritChance;
 
-			BodyTemplate.baseMoveSpeed = Configuration.BaseMoveSpeed;
-			BodyTemplate.levelMoveSpeed = Configuration.LevelMoveSpeed;
-			BodyTemplate.baseJumpCount = Configuration.BaseJumpCount;
-			BodyTemplate.baseJumpPower = Configuration.BaseJumpPower;
-			BodyTemplate.levelJumpPower = Configuration.LevelJumpPower;
-			BodyTemplate.baseAcceleration = Configuration.BaseAcceleration;
+			body.baseMoveSpeed = Configuration.BaseMoveSpeed;
+			body.levelMoveSpeed = Configuration.LevelMoveSpeed;
+			body.baseJumpCount = Configuration.BaseJumpCount;
+			body.baseJumpPower = Configuration.BaseJumpPower;
+			body.levelJumpPower = Configuration.LevelJumpPower;
+			body.baseAcceleration = Configuration.BaseAcceleration;
 		}
 
 		internal static void Init(VoidJailerPlayerPlugin plugin) {
+			Log.LogTrace("Initializing Survivor info!");
+
 			GameObject playerBodyPrefab = ROR2ObjectCreator.CreateBody("VoidJailerSurvivor", "RoR2/DLC1/VoidJailer/VoidJailerBody.prefab");
 			GameObject playerBodyLocator = PrefabAPI.InstantiateClone(playerBodyPrefab.GetComponent<ModelLocator>().modelBaseTransform.gameObject, "PlayerJailerBodyDisplay");
-			playerBodyLocator.AddComponent<NetworkIdentity>();
+			NetworkIdentity id = playerBodyLocator.AddComponent<NetworkIdentity>();
+			id.ClearClientOwner();
 
 			#region Body / Stats
 			CharacterBody body = playerBodyPrefab.GetComponent<CharacterBody>();
-			BodyTemplate = body;
+			UpdateSettings(body);
 			body.bodyColor = new Color(0.867f, 0.468f, 0.776f);
 			body.baseNameToken = Localization.SURVIVOR_NAME;
 			
@@ -74,16 +71,18 @@ namespace VoidJailerMod.Survivor {
 			// Immunity to void death is intentional. This is because it deletes the character model, which we don't want.
 			// Instead, we manually intercept the damage and apply it as a non-voiddeath source. This way it can kill the player and play the death animation without screwing up
 			// the killcam / spectator cam by suddenly yoinking the model out of existence.
-			UpdateSettings();
+
 			playerBodyPrefab.GetComponent<SetStateOnHurt>().canBeHitStunned = false;
 			ContentAddition.AddBody(playerBodyPrefab);
 
-			ContentAddition.AddEntityState<Skills.Spawn.SpawnState>(out _);
-			playerBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(Skills.Spawn.SpawnState));
+			Log.LogTrace("Setting up spawn animation...");
+			EntityStateMachine initialStateCtr = playerBodyPrefab.GetComponent<EntityStateMachine>();
+			initialStateCtr.initialStateType = UtilCreateSerializableAndNetRegister<Skills.Spawn.SpawnState>();
 
-			ContentAddition.AddEntityState<Skills.Death.DeathState>(out _);
+			Log.LogTrace("Setting up death animation...");
 			CharacterDeathBehavior deathBehavior = playerBodyPrefab.GetComponent<CharacterDeathBehavior>();
-			deathBehavior.deathState = new SerializableEntityStateType(typeof(Skills.Death.DeathState));
+			deathBehavior.deathState = UtilCreateSerializableAndNetRegister<Skills.Death.DeathState>();
+
 			Log.LogTrace("Finished creating the base body prefab. Configuring all data...");
 			#endregion
 
@@ -119,6 +118,7 @@ namespace VoidJailerMod.Survivor {
 			Log.LogTrace("Setting up skills.");
 			#region Passive
 			// Passive stuff:
+			Log.LogTrace("Passive skill...");
 			SkillLocator skillLoc = playerBodyPrefab.GetComponent<SkillLocator>();
 			skillLoc.passiveSkill = default;
 			skillLoc.passiveSkill.enabled = true;
@@ -130,9 +130,9 @@ namespace VoidJailerMod.Survivor {
 			#endregion
 
 			#region Primary
-			ContentAddition.AddEntityState<SpikeSkill>(out _);
+			Log.LogTrace("Primary Skill (\"Spike\")...");
 			SkillDef spike = ScriptableObject.CreateInstance<SkillDef>();
-			spike.activationState = new SerializableEntityStateType(typeof(SpikeSkill));
+			spike.activationState = UtilCreateSerializableAndNetRegister<SpikeSkill>();
 			spike.activationStateMachineName = "Weapon";
 			spike.baseMaxStock = 1;
 			spike.baseRechargeInterval = 0f;
@@ -152,13 +152,17 @@ namespace VoidJailerMod.Survivor {
 			spike.skillDescriptionToken = Localization.SKILL_PRIMARY_DESC;
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, spike, "primary", 0);
+
+			Log.LogTrace($"Registering intermediary state {nameof(SpikeCommonFireSequence)}");
+			ContentAddition.AddEntityState<SpikeCommonFireSequence>(out _);
+
 			Log.LogTrace("Finished registering Spike.");
 			#endregion
 
 			#region Secondary
-			ContentAddition.AddEntityState<CaptureSkill>(out _);
+			Log.LogTrace("Secondary Skill (\"Bind\")...");
 			SkillDef bind = ScriptableObject.CreateInstance<SkillDef>();//SurvivorCatalog.FindSurvivorDef("VoidJailer").bodyPrefab.GetComponent<SkillLocator>().secondary.skillDef;
-			bind.activationState = new SerializableEntityStateType(typeof(CaptureSkill));
+			bind.activationState = UtilCreateSerializableAndNetRegister<CaptureSkill>();
 			bind.activationStateMachineName = "Weapon";
 			bind.baseMaxStock = 1;
 			bind.baseRechargeInterval = 8;
@@ -178,13 +182,18 @@ namespace VoidJailerMod.Survivor {
 			bind.skillDescriptionToken = Localization.SKILL_SECONDARY_DESC;
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bind, "secondary", 0);
+
+			Log.LogTrace($"Registering intermediary states {nameof(SpikeCommonFireSequence)} and {nameof(ExitCapture)}");
+			ContentAddition.AddEntityState<CaptureCommonPullSequence>(out _);
+			ContentAddition.AddEntityState<ExitCapture>(out _);
+
 			Log.LogTrace("Finished registering Bind.");
 			#endregion
 
 			#region Utility
-			ContentAddition.AddEntityState<DiveSkill>(out _);
+			Log.LogTrace("Utility Skill (\"Dive\")...");
 			SkillDef dive = ScriptableObject.CreateInstance<SkillDef>();
-			dive.activationState = new SerializableEntityStateType(typeof(DiveSkill));
+			dive.activationState = UtilCreateSerializableAndNetRegister<DiveSkill>();
 			dive.activationStateMachineName = "Body";
 			dive.baseMaxStock = 1;
 			dive.baseRechargeInterval = 4f;
@@ -208,9 +217,9 @@ namespace VoidJailerMod.Survivor {
 			#endregion
 
 			#region Special
-			ContentAddition.AddEntityState<FurySkill>(out _);
+			Log.LogTrace("Special Skill (\"Fury of the Warden\")...");
 			SkillDef rage = ScriptableObject.CreateInstance<SkillDef>();
-			rage.activationState = new SerializableEntityStateType(typeof(FurySkill));
+			rage.activationState = UtilCreateSerializableAndNetRegister<FurySkill>();
 			rage.activationStateMachineName = "Body";
 			rage.baseMaxStock = 1;
 			rage.baseRechargeInterval = 45;
@@ -231,15 +240,16 @@ namespace VoidJailerMod.Survivor {
 			rage.keywordTokens = new string[] { Localization.SKILL_SPECIAL_KEYWORD };
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, rage, "special", 0);
-			Log.LogTrace("Finished registering Rage.");
+			Log.LogTrace("Finished registering Fury of the Warden.");
 			#endregion
 
 			#endregion
 
 			#region Survivor
+			Log.LogTrace("Creating Void Jailer Skins...");
 			ROR2ObjectCreator.AddJailerSkins(playerBodyPrefab);
-			Log.LogTrace("Finished registering skins...");
 
+			Log.LogTrace("Creating SurvivorDef instance...");
 			SurvivorDef survivorDef = ScriptableObject.CreateInstance<SurvivorDef>();
 			survivorDef.bodyPrefab = playerBodyPrefab;
 			survivorDef.descriptionToken = Localization.SURVIVOR_DESC;
@@ -255,31 +265,65 @@ namespace VoidJailerMod.Survivor {
 			Log.LogTrace("Finished registering survivor...");
 
 			ROR2ObjectCreator.FinalizeBody(playerBodyPrefab.GetComponent<SkillLocator>());
+			Log.LogTrace("Survivor object initialization is complete.");
 			#endregion
 
 			#region Survivor Hooks
+			Log.LogTrace("Creating method hooks...");
 			On.RoR2.CharacterBody.SetBuffCount += InterceptBuffsEvent;
 			On.RoR2.HealthComponent.TakeDamage += InterceptTakeDamageForVoidResist;
 			On.RoR2.HealthComponent.TakeDamage += InterceptTakeDamageForNullBuff;
 			On.RoR2.HealthComponent.TakeDamage += DoFakeVoidDeath;
 			On.RoR2.HealthComponent.TakeDamage += DoFuryFracture;
-			On.RoR2.CharacterBody.UpdateAllTemporaryVisualEffects += UpdateAllTempVFX;
+			On.RoR2.CharacterMaster.SpawnBody += OnSpawnBody;
+			
 
 			BodyCatalog.availability.CallWhenAvailable(() => {
+				// Register to HPBarAPI.
 				Registry.RegisterColorProvider(plugin, body.bodyIndex, new HPBarColorMarshaller());
 				Log.LogTrace("Custom Void-Style HP Bar colors registered.");
 			});
-
-			On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.RebuildMannequinInstance += OnRebuildMannequinInstance;
+			Log.LogTrace("Survivor init complete.");
 			#endregion
 		}
 
-		private static void UpdateAllTempVFX(On.RoR2.CharacterBody.orig_UpdateAllTemporaryVisualEffects orig, CharacterBody @this) {
+		private static CharacterBody OnSpawnBody(On.RoR2.CharacterMaster.orig_SpawnBody orig, CharacterMaster self, Vector3 position, Quaternion rotation) {
+			Log.LogTrace("Spawning " + self.bodyPrefab.name + "...");
+			CharacterBody result = orig(self, position, rotation);
+			Log.LogTrace("Spawned");
+			return result;
+		}
+
+		/// <summary>
+		/// Utility: Use <see cref="ContentAddition.AddEntityState{T}(out bool)"/> to register the provided entity state type, then return a new instance of <see cref="SerializableEntityStateType"/> using the same type.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		private static SerializableEntityStateType UtilCreateSerializableAndNetRegister<T>() where T : EntityState {
+			Log.LogTrace($"Registering EntityState {typeof(T).FullName} and returning a new instance of {nameof(SerializableEntityStateType)} of that type...");
+			ContentAddition.AddEntityState<T>(out _);
+			return new SerializableEntityStateType(typeof(T));
+
+		}
+#pragma warning disable Publicizer001
+
+		/// <summary>
+		/// Intent: Render brainstalks when the player has the "Fury" effect. This does not work properly. An IL edit to the line in vanilla code for brainstalks itself may be necessary. I would like to avoid this.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		private static void UpdateAllTempVFX(On.RoR2.CharacterBody.orig_UpdateAllTemporaryVisualEffects originalMethod, CharacterBody @this) {
+			originalMethod(@this);
 			@this.UpdateSingleTemporaryVisualEffect(ref @this.noCooldownEffectInstance, CharacterBody.AssetReferences.noCooldownEffectPrefab, @this.radius, @this.HasBuff(BuffProvider.Fury) || @this.HasBuff(RoR2Content.Buffs.NoCooldowns), "Head");
 		}
 
+		/// <summary>
+		/// Intent: Intercept damage to see if it has the custom "Null Boosted" type. This applies to the primary fire only. It increases the damage dealt if the victim is tethered or nullified.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		/// <param name="damageInfo"></param>
 		private static void InterceptTakeDamageForNullBuff(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
-			
 			if (damageInfo.HasModdedDamageType(DamageTypeProvider.NullBoosted) && (@this.body.HasBuff(DLC1Content.Buffs.JailerTether) || @this.body.HasBuff(RoR2Content.Buffs.Nullified))) {
 				damageInfo.damageColorIndex = DamageColorIndex.WeakPoint;
 				damageInfo.damage *= 1.75f;
@@ -287,21 +331,12 @@ namespace VoidJailerMod.Survivor {
 			originalMethod(@this, damageInfo);
 		}
 
-#pragma warning disable Publicizer001
-
-		private static void OnRebuildMannequinInstance(On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.orig_RebuildMannequinInstance originalMethod, RoR2.SurvivorMannequins.SurvivorMannequinSlotController @this) {
-			originalMethod(@this);
-			if (@this.mannequinInstanceTransform != null && @this.currentSurvivorDef == Jailer) {
-				Animator previewAnimator = @this.mannequinInstanceTransform.transform.Find("mdlVoidJailer").GetComponent<Animator>();
-				previewAnimator.SetBool("isGrounded", true); // Fix an animation bug
-				previewAnimator.SetFloat("Spawn.playbackRate", 1f);
-				previewAnimator.Play("Spawn");
-				// Util.PlaySound(spawnSoundString, @this.mannequinInstanceTransform.gameObject);
-				// EffectManager.SimpleMuzzleFlash(NullifierSpawnState.spawnEffectPrefab, @this.mannequinInstanceTransform.gameObject, "PortalEffect", false);
-			}
-		}
-
-
+		/// <summary>
+		/// Intent: Do our best to see if damage from a Void Seed / Atmosphere is being dealt, and cancel it.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		/// <param name="damageInfo"></param>
 		private static void InterceptTakeDamageForVoidResist(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
 			if (damageInfo.rejected) {
 				originalMethod(@this, damageInfo);
@@ -318,6 +353,13 @@ namespace VoidJailerMod.Survivor {
 			originalMethod(@this, damageInfo);
 		}
 
+		/// <summary>
+		/// Intent: Cancel void fog.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		/// <param name="buffType"></param>
+		/// <param name="newCount"></param>
 		private static void InterceptBuffsEvent(On.RoR2.CharacterBody.orig_SetBuffCount originalMethod, CharacterBody @this, BuffIndex buffType, int newCount) {
 			if (@this.baseNameToken == Localization.SURVIVOR_NAME) {
 				if (buffType == MegaVoidFog || buffType == NormVoidFog || buffType == WeakVoidFog) {
@@ -330,6 +372,13 @@ namespace VoidJailerMod.Survivor {
 			originalMethod(@this, buffType, newCount);
 		}
 
+		/// <summary>
+		/// Detects when a character dies, and spawns a fake void crit glasses effect. This is used to dramatize the existing void death effect when enemies get killed by the black hole thing. 
+		/// Looks really cool, purely cosmetic.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		/// <param name="damageInfo"></param>
 		private static void DoFakeVoidDeath(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
 			if (damageInfo.rejected) {
 				originalMethod(@this, damageInfo);
@@ -359,6 +408,12 @@ namespace VoidJailerMod.Survivor {
 			}
 		}
 
+		/// <summary>
+		/// Similar to <see cref="DoFakeVoidDeath(On.RoR2.HealthComponent.orig_TakeDamage, HealthComponent, DamageInfo)"/>, this spawns the cromch effect from Collapse.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		/// <param name="damageInfo"></param>
 		private static void DoFuryFracture(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
 			if (damageInfo.rejected) {
 				originalMethod(@this, damageInfo);

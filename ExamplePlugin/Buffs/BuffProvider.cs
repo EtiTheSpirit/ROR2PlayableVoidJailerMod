@@ -12,8 +12,10 @@ namespace VoidJailerMod.Buffs {
 		public static BuffDef Fury { get; private set; }
 
 		internal static void Init() {
+
 			BetterUIInteroperability.Init();
 
+			Log.LogTrace("Creating \"Fury\" effect.");
 			Fury = ScriptableObject.CreateInstance<BuffDef>();
 			Fury.isDebuff = false;
 			Fury.buffColor = new Color32(255, 127, 127, 255);
@@ -22,6 +24,7 @@ namespace VoidJailerMod.Buffs {
 
 			On.RoR2.CharacterBody.RecalculateStats += OnRecalculateStats;
 			BetterUIInteroperability.RegisterBuffInfo(Fury, Localization.BUFF_PLAYERVOIDJAILER_FURY_NAME, Localization.BUFF_PLAYERVOIDJAILER_FURY_DESC);
+			Log.LogTrace("Buffs initialized.");
 		}
 
 		private static void OnRecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats originalMethod, CharacterBody @this) {

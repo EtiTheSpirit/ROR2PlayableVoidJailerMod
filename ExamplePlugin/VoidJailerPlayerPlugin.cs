@@ -22,6 +22,7 @@ namespace VoidJailerMod {
 		public const string PLUGIN_VERSION = "1.0.0";
 		
 		public void Awake() {
+			Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.Full);
 			Log.Init(Logger);
 			Configuration.Init(Config);
 			Localization.Init();
@@ -30,6 +31,7 @@ namespace VoidJailerMod {
 			ProjectileProvider.Init();
 			EffectProvider.Init();
 			VoidJailerSurvivor.Init(this);
+			Log.LogTrace("Mod initialization cycle complete.");
 		}
 
 	}

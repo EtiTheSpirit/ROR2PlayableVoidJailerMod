@@ -44,8 +44,8 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void FixedUpdate() {
 			base.FixedUpdate();
 			if (fixedAge >= _totalDuration && isAuthority) {
-				SpikeCommonFireSequence nextState = new SpikeCommonFireSequence();
-				outer.SetNextState(nextState);
+				Log.LogTrace($"Transitioning into a new instance of {nameof(SpikeCommonFireSequence)}!");
+				outer.SetNextState(new SpikeCommonFireSequence());
 				return;
 			}
 		}

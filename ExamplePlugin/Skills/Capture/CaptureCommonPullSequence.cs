@@ -84,6 +84,7 @@ namespace VoidJailerMod.Skills.Capture {
 		public override void FixedUpdate() {
 			base.FixedUpdate();
 			if (fixedAge > Duration) {
+				Log.LogTrace($"Transitioning into a new instance of {nameof(ExitCapture)}!");
 				outer.SetNextState(new ExitCapture());
 			}
 		}

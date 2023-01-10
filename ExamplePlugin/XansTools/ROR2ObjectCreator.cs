@@ -16,6 +16,8 @@ namespace VoidJailerMod.XansTools {
 		/// </summary>
 		/// <returns></returns>
 		private static SkillFamily CreateSingleVariantFamily() {
+			// No ContentAddition here!
+			Log.LogTrace("Creating single-variant SkillFamily.");
 			SkillFamily skillFamily = ScriptableObject.CreateInstance<SkillFamily>();
 			skillFamily.variants = new SkillFamily.Variant[1];
 			return skillFamily;
@@ -29,32 +31,41 @@ namespace VoidJailerMod.XansTools {
 		/// <param name="bodyReplacementName">The name of the body prefab.</param>
 		/// <param name="bodyDir">The location of the body prefab.</param>
 		/// <returns></returns>
-		public static GameObject CreateBody(string bodyReplacementName, string bodyDir = "RoR2/Base/Commando/CommandoBody.prefab") {
+		public static GameObject CreateBody(string bodyReplacementName, string bodyDir) {
+			Log.LogTrace($"Creating new CharacterBody of {bodyDir} as {bodyReplacementName}");
 			GameObject newBody = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(bodyDir).WaitForCompletion(), bodyReplacementName);
+
+			Log.LogTrace("Destroying all pre-existing skill instances of the duplicate body...");
 			foreach (GenericSkill preExistingSkill in newBody.GetComponentsInChildren<GenericSkill>()) {
 				Object.DestroyImmediate(preExistingSkill);
 			}
 
+			Log.LogTrace("Clearing DeathRewards (if present)...");
 			// Prevent it from being classified as a monster.
 			DeathRewards deathRewards = newBody.GetComponent<DeathRewards>();
 			if (deathRewards != null) Object.Destroy(deathRewards);
 
+			Log.LogTrace("Clearing SkillLocator for new skills...");
 			SkillLocator skillLocator = newBody.GetComponent<SkillLocator>();
 			skillLocator.allSkills = System.Array.Empty<GenericSkill>();
 			skillLocator.primary = newBody.AddComponent<GenericSkill>();
 			skillLocator.secondary = newBody.AddComponent<GenericSkill>();
 			skillLocator.utility = newBody.AddComponent<GenericSkill>();
 			skillLocator.special = newBody.AddComponent<GenericSkill>();
+
+			Log.LogTrace("Adding single-variant placeholder skills...");
 			SkillFamily primaryFamily = CreateSingleVariantFamily();
 			SkillFamily secondaryFamily = CreateSingleVariantFamily();
 			SkillFamily utilityFamily = CreateSingleVariantFamily();
 			SkillFamily specialFamily = CreateSingleVariantFamily();
 
+			Log.LogTrace("Assigning empty skills...");
 			skillLocator.primary._skillFamily = primaryFamily;
 			skillLocator.secondary._skillFamily = secondaryFamily;
 			skillLocator.utility._skillFamily = utilityFamily;
 			skillLocator.special._skillFamily = specialFamily;
 
+			Log.LogTrace("Body instantiated.");
 			return newBody;
 		}
 
@@ -65,6 +76,7 @@ namespace VoidJailerMod.XansTools {
 		/// </summary>
 		/// <param name="skillLocator"></param>
 		public static void FinalizeBody(SkillLocator skillLocator) {
+			Log.LogTrace("Finalizing body by using ContentAddition to register all skills...");
 			ContentAddition.AddSkillFamily(skillLocator.primary._skillFamily);
 			ContentAddition.AddSkillFamily(skillLocator.secondary._skillFamily);
 			ContentAddition.AddSkillFamily(skillLocator.utility._skillFamily);
@@ -81,6 +93,7 @@ namespace VoidJailerMod.XansTools {
 		/// <param name="variantIndex">The index of this variant. If this index is larger than the number of variants the <see cref="SkillFamily"/> can contain, its array is resized.</param>
 		/// <exception cref="System.ArgumentOutOfRangeException">If <paramref name="slotName"/> is not valid.</exception>
 		public static void AddSkill(GameObject bodyContainer, SkillDef definition, string slotName = "primary", int variantIndex = 0) {
+			Log.LogTrace($"Adding a skill to this character's {slotName} skill slot. Registering skill to ContentAddition...");
 			ContentAddition.AddSkillDef(definition);
 			SkillLocator skillLocator = bodyContainer.GetComponent<SkillLocator>();
 			skillLocator.allSkills = System.Array.Empty<GenericSkill>();
@@ -103,6 +116,7 @@ namespace VoidJailerMod.XansTools {
 					throw new System.ArgumentOutOfRangeException(nameof(slotName), "Invalid slot name! Expecting either \"primary\", \"secondary\", \"utility\", or \"special\"!");
 			}
 
+			Log.LogTrace("Locating Skill Family...");
 			SkillFamily family = target.skillFamily;
 			SkillFamily.Variant[] variants = family.variants;
 			if (variants.Length >= variantIndex) {
@@ -114,7 +128,7 @@ namespace VoidJailerMod.XansTools {
 			newVariant.viewableNode = new ViewablesCatalog.Node(definition.skillName + "_VIEW", false, null);
 			variants[variantIndex] = newVariant;
 			family.variants = variants;
-			Log.LogTrace($"Appended new skill in slot \"{slotName}\": {definition.skillNameToken}");
+			Log.LogTrace($"Done. Appended new skill in slot \"{slotName}\": {definition.skillNameToken}");
 		}
 
 		/// <summary>
@@ -127,10 +141,12 @@ namespace VoidJailerMod.XansTools {
 			GameObject effectiveRoot = component.modelTransform.gameObject;
 
 			// Clone the materials because I change some parameters
+			Log.LogTrace("Cloning the default materials of the Jailer...");
 			Material mtl0 = new Material(renderers[0].material);
 			Material mtl1 = new Material(renderers[1].material);
 			Material mtl2 = new Material(renderers[2].material);
 
+			Log.LogTrace("Instantiating the default skin...");
 			LoadoutAPI.SkinDefInfo defaultSkin = new LoadoutAPI.SkinDefInfo {
 				Icon = SkinIconCreator.CreateSkinIcon(
 					new Color32(24, 1, 33, 255),
@@ -167,6 +183,7 @@ namespace VoidJailerMod.XansTools {
 				MinionSkinReplacements = Ext.NewEmpty<SkinDef.MinionSkinReplacement>()
 			};
 
+			Log.LogTrace("Disabling transparency dithering...");
 			mtl0.SetFloat("_DitherOn", 0);
 			mtl1.SetFloat("_DitherOn", 0);
 			mtl2.SetFloat("_DitherOn", 0);
@@ -179,10 +196,12 @@ namespace VoidJailerMod.XansTools {
 			GameObject ally = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidJailer/VoidJailerAllyBody.prefab").WaitForCompletion();
 			Renderer[] allyRenderers = ally.GetComponentsInChildren<Renderer>();
 
+			Log.LogTrace("Cloning the default materials of the Jailer (ally variant)...");
 			mtl0 = new Material(allyRenderers[0].material);
 			mtl1 = new Material(allyRenderers[1].material);
 			mtl2 = new Material(allyRenderers[2].material);
 
+			Log.LogTrace("Instantiating the ally skin...");
 			LoadoutAPI.SkinDefInfo ghostSkin = new LoadoutAPI.SkinDefInfo {
 				Icon = SkinIconCreator.CreateSkinIcon(
 					new Color32(183, 172, 175, 255),
@@ -220,6 +239,7 @@ namespace VoidJailerMod.XansTools {
 			};
 
 
+			Log.LogTrace("Disabling transparency dithering...");
 			mtl0.SetFloat("_DitherOn", 0);
 			mtl1.SetFloat("_DitherOn", 0);
 			mtl2.SetFloat("_DitherOn", 0);
@@ -227,49 +247,20 @@ namespace VoidJailerMod.XansTools {
 			mtl1.DisableKeyword("DITHER");
 			mtl2.DisableKeyword("DITHER");
 
+			Log.LogTrace("Adding skin controller, if necessary...");
 			ModelSkinController ctrl = effectiveRoot.GetOrCreateComponent<ModelSkinController>(out bool justCreatedController);
 			if (justCreatedController) {
 				ctrl.characterModel = bodyContainer.GetComponent<CharacterModel>();
 				ctrl.skins = Ext.NewEmpty<SkinDef>();
 			}
 
+			Log.LogTrace("Registering skins with LoadoutAPI...");
 			LoadoutAPI.AddSkinToCharacter(bodyContainer, defaultSkin);
 			LoadoutAPI.AddSkinToCharacter(bodyContainer, ghostSkin);
+
+			Log.LogTrace("Done creating skins.");
 		}
 #pragma warning restore Publicizer001
-
-		private static SkillFamily CreateAndRegisterSkill(int variants) {
-			SkillFamily skillFamily = ScriptableObject.CreateInstance<SkillFamily>();
-			skillFamily.variants = new SkillFamily.Variant[variants];
-			ContentAddition.AddSkillFamily(skillFamily);
-			return skillFamily;
-		}
-
-		private static void CreateSkillFamilyIn(ref GenericSkill skill, GameObject onBody, int variants) {
-			skill = onBody.AddComponent<GenericSkill>();
-#pragma warning disable Publicizer001
-			skill._skillFamily = CreateAndRegisterSkill(variants);
-#pragma warning restore Publicizer001
-		}
-
-		public static GameObject NewSurvivorFromExistingPrefab(string name, string dataPath, int primaries = 1, int secondaries = 1, int utilities = 1, int specials = 1) {
-			GameObject survivor = PrefabAPI.InstantiateClone(
-				Addressables.LoadAssetAsync<GameObject>(dataPath).WaitForCompletion(),
-				"XanVoidJailerPlayer/" + name
-			);
-
-			// Strip away original skills
-			foreach (GenericSkill skill in survivor.GetComponentsInChildren<GenericSkill>()) {
-				Object.DestroyImmediate(skill);
-			}
-
-			SkillLocator skillLocator = survivor.GetComponent<SkillLocator>();
-			CreateSkillFamilyIn(ref skillLocator.primary, survivor, primaries);
-			CreateSkillFamilyIn(ref skillLocator.secondary, survivor, secondaries);
-			CreateSkillFamilyIn(ref skillLocator.utility, survivor, utilities);
-			CreateSkillFamilyIn(ref skillLocator.special, survivor, specials);
-			return survivor;
-		}
 
 	}
 }
