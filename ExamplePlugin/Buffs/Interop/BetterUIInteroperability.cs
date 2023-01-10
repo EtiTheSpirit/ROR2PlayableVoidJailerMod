@@ -17,13 +17,13 @@ namespace VoidJailerMod.Buffs.Interop {
 				Assembly[] asms = AppDomain.CurrentDomain.GetAssemblies();
 				Type betterUIBuffs = null;
 
-				try {
-					for (int index = 0; index < asms.Length; index++) {
+				for (int index = 0; index < asms.Length; index++) {
+					try {
 						Assembly asm = asms[index];
 						betterUIBuffs = asm.GetTypes().FirstOrDefault(type => type.Namespace == "BetterUI" && type.Name == "Buffs");
 						if (betterUIBuffs != null) break;
-					}
-				} catch { } // Don't care about this one.
+					} catch { } // Don't care about this one.
+				}
 
 				if (betterUIBuffs != null) {
 					MethodInfo buffRegisterMtd = betterUIBuffs.GetMethod("RegisterBuffInfo", new Type[] { typeof(BuffDef), typeof(string), typeof(string) });
