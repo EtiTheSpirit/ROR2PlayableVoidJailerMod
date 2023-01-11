@@ -1,7 +1,9 @@
-## 1.0.2
-#### pov: you are battling a rock to see what has a higher mental capacity (the rock is winning)
-* Fixed a few more rather foolish bugs that could cause things to flat out break in the game.
-* Fixed a different type of NRE that was thrown on occasion.
+## 1.1.0
+#### Okay NOW it works. I hope.
+* Fixed a few foolish bugs that could completely brick visual effects.
+* Fixed an error causing the Jailer to be unusable (stuck, could not activate skills) on remote clients in multiplayer environments.
+* Fixed a few bugs relating to missing networking components on objects that needed them.
+* Changed stats to be more appropriate.
 
 ## 1.0.1
 #### Yeah, I guess that was my fault.
