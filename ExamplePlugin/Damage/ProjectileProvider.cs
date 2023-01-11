@@ -29,7 +29,7 @@ namespace VoidJailerMod.Damage {
 			SpikeDart.AddComponent<NetworkIdentity>();
 
 			Log.LogTrace("Adjusting parameters of Spike Dart...");
-			float rotationSpeedIfUsed = 20f;
+			float rotationSpeedIfUsed = 22.5f;
 			ProjectileSimple projectile = SpikeDart.GetComponent<ProjectileSimple>();
 			if (Configuration.FasterPrimaryProjectiles) {
 				Log.LogTrace("User wants to use faster projectiles. Doubling the speed and halving the lifetime...");

@@ -291,8 +291,8 @@ namespace VoidJailerMod {
 			_specialDamageBoost = Bind("3d. Character Special", "Rage Damage Boost", 3f, StaticDeclareConfigDescription("The amount of damage that the player gets while under the effects of Rage of the Warden. All damage is multiplied by this value.", MinOnlyF()));
 			// _specialExtraProjectiles = Bind("3d. Character Special", "Rage Additional Projectiles", 3f, StaticDeclareConfigDescription("The amount of projectiles that the primary fires is multiplied by this amount (and rounded) while under the effects of Rage of the Warden.", MinOnlyF()));
 
-			_baseDamage = Bind("4. Character Combat", "Base Damage", 14f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
-			_levelDamage = Bind("4. Character Combat", "Leveled Damage", 2.8f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
+			_baseDamage = Bind("4. Character Combat", "Base Damage", 7f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
+			_levelDamage = Bind("4. Character Combat", "Leveled Damage", 2.4f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
 			_baseCritChance = Bind("4. Character Combat", "Base Crit Chance", 0f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "critical hit chance") + " This is an integer percentage from 0 to 100, not 0 to 1.", new AcceptableValueRange<float>(0, 100)));
 			_levelCritChance = Bind("4. Character Combat", "Leveled Crit Chance", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "critical hit chance") + " This is an integer percentage from 0 to 100, not 0 to 1.", new AcceptableValueRange<float>(0, 100)));
 			_baseAttackSpeed = Bind("4. Character Combat", "Base Attack Speed", 1.45f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "attack rate"), MinOnlyF()));

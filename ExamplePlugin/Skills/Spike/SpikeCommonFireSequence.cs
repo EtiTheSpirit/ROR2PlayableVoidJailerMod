@@ -37,7 +37,7 @@ namespace VoidJailerMod.Skills.Spike {
 				Vector3 newDirection = aimRay.direction;
 				if (Configuration.HomingPrimaryProjectiles) {
 					BullseyeSearch bullseyeSearch = new BullseyeSearch {
-						teamMaskFilter = TeamMask.AllExcept(characterBody.teamComponent.teamIndex),
+						teamMaskFilter = TeamMask.allButNeutral,
 						maxAngleFilter = 2.5f,
 						minDistanceFilter = 0f,
 						maxDistanceFilter = ProjectileProvider.SpikeMaxDistance,
@@ -46,12 +46,16 @@ namespace VoidJailerMod.Skills.Spike {
 						sortMode = BullseyeSearch.SortMode.Angle,
 						filterByLoS = true
 					};
+					bullseyeSearch.teamMaskFilter.RemoveTeam(TeamComponent.GetObjectTeam(gameObject));
 					bullseyeSearch.RefreshCandidates();
 					bullseyeSearch.FilterOutGameObject(gameObject);
-					HurtBox firstVictimHurtBox = bullseyeSearch.GetResults().FirstOrDefault();
-					target = (firstVictimHurtBox && firstVictimHurtBox.healthComponent && firstVictimHurtBox.healthComponent.body) ? firstVictimHurtBox.healthComponent.body.gameObject : null;
-					if (firstVictimHurtBox) {
-						newDirection = (firstVictimHurtBox.transform.position - aimRay.origin).normalized;
+
+					IEnumerable<HurtBox> results = bullseyeSearch.GetResults();
+					results = results.SkipWhile(result => result && !FriendlyFireManager.ShouldSeekingProceed(result.healthComponent, TeamComponent.GetObjectTeam(gameObject)));
+					HurtBox victim = results.FirstOrDefault();
+					target = (victim && victim.healthComponent && victim.healthComponent.body) ? victim.healthComponent.body.gameObject : null;
+					if (victim) {
+						newDirection = (victim.transform.position - aimRay.origin).normalized;
 					}
 				}
 				GameObject projectile;

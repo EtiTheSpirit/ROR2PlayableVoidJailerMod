@@ -22,7 +22,7 @@ namespace VoidJailerMod.Skills.Capture {
 			Ray aimRay = GetAimRay();
 			if (NetworkServer.active) {
 				BullseyeSearch bullseyeSearch = new BullseyeSearch {
-					teamMaskFilter = TeamMask.AllExcept(characterBody.teamComponent.teamIndex),
+					teamMaskFilter = TeamMask.allButNeutral,
 					maxAngleFilter = PullFieldOfView,
 					minDistanceFilter = PullMinDistance,
 					maxDistanceFilter = PullMaxDistance,
@@ -33,17 +33,19 @@ namespace VoidJailerMod.Skills.Capture {
 				};
 				bullseyeSearch.RefreshCandidates();
 				bullseyeSearch.FilterOutGameObject(gameObject);
-				HurtBox firstVictimHurtBox = bullseyeSearch.GetResults().FirstOrDefault();
-				if (firstVictimHurtBox) {
-					Vector3 difference = firstVictimHurtBox.transform.position - aimRay.origin;
+				IEnumerable<HurtBox> results = bullseyeSearch.GetResults();
+				results = results.SkipWhile(result => result && !FriendlyFireManager.ShouldDirectHitProceed(result.healthComponent, TeamComponent.GetObjectTeam(gameObject)));
+				HurtBox targetHurtBox = results.FirstOrDefault();
+				if (targetHurtBox) {
+					Vector3 difference = targetHurtBox.transform.position - aimRay.origin;
 					float distance = difference.magnitude;
 					Vector3 direction = difference / distance;
 					float mass = 1f;
-					CharacterBody body = firstVictimHurtBox.healthComponent.body;
+					CharacterBody body = targetHurtBox.healthComponent.body;
 					if (body.characterMotor) {
 						mass = body.characterMotor.mass;
 					} else {
-						Rigidbody rb = firstVictimHurtBox.healthComponent.GetComponent<Rigidbody>();
+						Rigidbody rb = targetHurtBox.healthComponent.GetComponent<Rigidbody>();
 						if (rb) {
 							mass = rb.mass;
 						}
@@ -58,14 +60,14 @@ namespace VoidJailerMod.Skills.Capture {
 						attacker = gameObject,
 						damage = damageStat * Configuration.BaseSecondaryDamage,
 						damageColorIndex = DamageColorIndex.Void,
-						position = firstVictimHurtBox.transform.position,
+						position = targetHurtBox.transform.position,
 						procCoefficient = ProcCoefficient
 					};
-					firstVictimHurtBox.healthComponent.TakeDamageForce(direction * mass, true, true);
-					firstVictimHurtBox.healthComponent.TakeDamage(damageInfo);
-					GlobalEventManager.instance.OnHitEnemy(damageInfo, firstVictimHurtBox.healthComponent.gameObject);
+					targetHurtBox.healthComponent.TakeDamageForce(direction * mass, true, true);
+					targetHurtBox.healthComponent.TakeDamage(damageInfo);
+					GlobalEventManager.instance.OnHitEnemy(damageInfo, targetHurtBox.healthComponent.gameObject);
 					if (PullTracerPrefab) {
-						Vector3 position = firstVictimHurtBox.transform.position;
+						Vector3 position = targetHurtBox.transform.position;
 						Vector3 start = characterBody.corePosition;
 						Transform transform = FindModelChild(MuzzleString);
 						if (transform) {

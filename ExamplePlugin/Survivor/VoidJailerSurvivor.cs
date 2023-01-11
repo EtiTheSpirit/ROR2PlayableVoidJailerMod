@@ -23,6 +23,8 @@ using Interactor = RoR2.Interactor;
 namespace VoidJailerMod.Survivor {
 	public class VoidJailerSurvivor {
 
+		private static GameObject playerBodyPrefab;
+
 		public static SurvivorDef Jailer { get; private set; }
 
 		// TODO: Try to allow runtime edits by using one of the popular settings mods?
@@ -56,11 +58,19 @@ namespace VoidJailerMod.Survivor {
 		internal static void Init(VoidJailerPlayerPlugin plugin) {
 			Log.LogTrace("Initializing Survivor info!");
 
-			GameObject playerBodyPrefab = ROR2ObjectCreator.CreateBody("VoidJailerSurvivor", "RoR2/DLC1/VoidJailer/VoidJailerBody.prefab");
-			GameObject playerBodyLocator = PrefabAPI.InstantiateClone(playerBodyPrefab.GetComponent<ModelLocator>().modelBaseTransform.gameObject, "PlayerJailerBodyDisplay");
-			playerBodyLocator.AddComponent<NetworkIdentity>();
+			playerBodyPrefab = ROR2ObjectCreator.CreateBody("VoidJailerSurvivor", "RoR2/DLC1/VoidJailer/VoidJailerBody.prefab");
+
+			Log.LogTrace("Setting localPlayerAuthority=true on Jailer Body (this patches a bug)...");
+			NetworkIdentity netID = playerBodyPrefab.GetComponent<NetworkIdentity>();
+			netID.localPlayerAuthority = true;
+
+			Log.LogTrace("Duplicating the body for display in the Survivor Selection screen...");
+			GameObject playerBodyDisplayPrefab = PrefabAPI.InstantiateClone(playerBodyPrefab.GetComponent<ModelLocator>().modelBaseTransform.gameObject, "PlayerJailerBodyDisplay");
+			netID = playerBodyDisplayPrefab.AddComponent<NetworkIdentity>();
+			netID.localPlayerAuthority = true;
 
 			#region Body / Stats
+			Log.LogTrace("Preparing the Body's style and stats...");
 			CharacterBody body = playerBodyPrefab.GetComponent<CharacterBody>();
 			UpdateSettings(body);
 			body.bodyColor = new Color(0.867f, 0.468f, 0.776f);
@@ -255,7 +265,7 @@ namespace VoidJailerMod.Survivor {
 			survivorDef.displayNameToken = Localization.SURVIVOR_NAME;
 			survivorDef.outroFlavorToken = Localization.SURVIVOR_OUTRO;
 			survivorDef.mainEndingEscapeFailureFlavorToken = Localization.SURVIVOR_OUTRO_FAILED;
-			survivorDef.displayPrefab = playerBodyLocator;
+			survivorDef.displayPrefab = playerBodyDisplayPrefab;
 			survivorDef.displayPrefab.transform.localScale = Vector3.one * 0.25f;
 			survivorDef.primaryColor = new Color(0.5f, 0.5f, 0.5f);
 			survivorDef.desiredSortPosition = 44.45f;
@@ -274,7 +284,8 @@ namespace VoidJailerMod.Survivor {
 			On.RoR2.HealthComponent.TakeDamage += InterceptTakeDamageForNullBuff;
 			On.RoR2.HealthComponent.TakeDamage += DoFakeVoidDeath;
 			On.RoR2.HealthComponent.TakeDamage += DoFuryFracture;
-			On.RoR2.CharacterMaster.SpawnBody += OnSpawnBody;
+			On.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string += OnUpdatingVFX;
+			// On.RoR2.CharacterMaster.SpawnBody += OnSpawnBody;
 			
 
 			BodyCatalog.availability.CallWhenAvailable(() => {
@@ -286,11 +297,12 @@ namespace VoidJailerMod.Survivor {
 			#endregion
 		}
 
-		private static CharacterBody OnSpawnBody(On.RoR2.CharacterMaster.orig_SpawnBody orig, CharacterMaster self, Vector3 position, Quaternion rotation) {
-			Log.LogTrace("Spawning " + self.bodyPrefab.name + "...");
-			CharacterBody result = orig(self, position, rotation);
-			Log.LogTrace("Spawned");
-			return result;
+#pragma warning disable Publicizer001
+		private static void OnUpdatingVFX(On.RoR2.CharacterBody.orig_UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string originalMethod, CharacterBody @this, ref TemporaryVisualEffect tempEffect, GameObject tempEffectPrefab, float effectRadius, bool active, string childLocatorOverride) {
+			if (tempEffectPrefab == CharacterBody.AssetReferences.noCooldownEffectPrefab) {
+				active = active || @this.HasBuff(BuffProvider.Fury);
+			}
+			originalMethod(@this, ref tempEffect, tempEffectPrefab, effectRadius, active, childLocatorOverride);
 		}
 
 		/// <summary>
@@ -302,9 +314,7 @@ namespace VoidJailerMod.Survivor {
 			Log.LogTrace($"Registering EntityState {typeof(T).FullName} and returning a new instance of {nameof(SerializableEntityStateType)} of that type...");
 			ContentAddition.AddEntityState<T>(out _);
 			return new SerializableEntityStateType(typeof(T));
-
 		}
-#pragma warning disable Publicizer001
 
 		/// <summary>
 		/// Intent: Render brainstalks when the player has the "Fury" effect. This does not work properly. An IL edit to the line in vanilla code for brainstalks itself may be necessary. I would like to avoid this.

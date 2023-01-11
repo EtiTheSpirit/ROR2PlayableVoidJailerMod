@@ -64,9 +64,9 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public static string EnterSoundString => EntityStates.VoidJailer.Weapon.ChargeCapture.enterSoundString;
 
-		public static GameObject ChargeEffectPrefab => EffectProvider.ChargeTetherEffect;//EntityStates.VoidJailer.Weapon.ChargeCapture.chargeEffectPrefab;
+		public static GameObject ChargeEffectPrefab => EntityStates.VoidJailer.Weapon.ChargeCapture.chargeEffectPrefab;
 
-		public static GameObject AttackIndicatorPrefab => EffectProvider.TetherAttackIndicatorEffect;//EntityStates.VoidJailer.Weapon.ChargeCapture.attackIndicatorPrefab;
+		public static GameObject AttackIndicatorPrefab => EntityStates.VoidJailer.Weapon.ChargeCapture.attackIndicatorPrefab;
 
 		public static string MuzzleString => EntityStates.VoidJailer.Weapon.ChargeCapture.muzzleString;
 
