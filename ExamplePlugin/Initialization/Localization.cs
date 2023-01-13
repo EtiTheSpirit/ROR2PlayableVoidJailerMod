@@ -24,12 +24,14 @@ namespace VoidJailerMod
 		public const string PASSIVE_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_PASSIVE_NAME";
 		public const string PASSIVE_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_PASSIVE_DESC";
 
-		public const string SKILL_PRIMARY_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_PRIMARY_NAME";
+		public const string SKILL_PRIMARY_SHOTGUN_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_PRIMARY_SHOTGUN_NAME";
+		public const string SKILL_PRIMARY_MINIGUN_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_PRIMARY_MINIGUN_NAME";
 		public const string SKILL_SECONDARY_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_SECONDARY_NAME";
 		public const string SKILL_UTILITY_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_UTILITY_NAME";
 		public const string SKILL_SPECIAL_NAME = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_SPECIAL_NAME";
 
-		public const string SKILL_PRIMARY_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_PRIMARY_DESC";
+		public const string SKILL_PRIMARY_SHOTGUN_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_PRIMARY_SHOTGUN_DESC";
+		public const string SKILL_PRIMARY_MINIGUN_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_PRIMARY_MINIGUN_DESC";
 		public const string SKILL_SECONDARY_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_SECONDARY_DESC";
 		public const string SKILL_UTILITY_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_UTILITY_DESC";
 		public const string SKILL_SPECIAL_DESC = $"{UNIQUE_SURVIVOR_PREFIX}_SKILL_SPECIAL_DESC";
@@ -102,7 +104,7 @@ namespace VoidJailerMod
 			#region Name and Lore
 			Bind(SURVIVOR_NAME, "Void Jailer");
 			Bind(SURVIVOR_DESC, LinesToSurvivorDetails(
-				"The Void Jailer specializes in short range, one-on-one combat. It has an exceptionally high burst damage output, but struggles with attack speed, making it vulnerable to swarms of enemies.",
+				"The Void Jailer specializes in short range, one-on-one combat. It has an exceptionally high burst damage output, but struggles with attack speed, making it vulnerable to swarms of enemies.\n\n<style=cIsHealing>Player Advice: You may be interested in opening \"Mod Options\" in your settings. You can configure the Jailer's camera settings here, since large characters (like this one) can often get in the way of things like combat.</style>",
 				"<style=cIsVoid>Spike</style> is a shotgun-like ability that can deal devastating blows to larger targets. It does extra damage against rooted enemies, so consider picking up a <style=cIsVoid>Tentabauble</style> if you find one.",
 				"<style=cIsVoid>Bind</style> roots and damages a single target, pulling them directly in front of you.",
 				"<style=cIsVoid>Dive</style> is a powerful escape tool. Alongside healing you, it makes enemies lose track of you, and protects you from incoming damage.",
@@ -131,13 +133,16 @@ namespace VoidJailerMod
 			#endregion
 
 			#region Primary
-			Bind(SKILL_PRIMARY_NAME, "Spike");
-			Bind(SKILL_PRIMARY_DESC, $"Fire spikes from your claw, dealing <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.BasePrimaryDamage)}</style> damage</style>, plus an additional <style=cIsDamage>75% damage</style> on targets that are <style=cIsVoid>Nullified</style> or <style=cIsVoid>Tethered</style>.");
+			Bind(SKILL_PRIMARY_SHOTGUN_NAME, "Spike");
+			Bind(SKILL_PRIMARY_SHOTGUN_DESC, $"Fire a burst of spikes from your claw, dealing <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.BasePrimaryDamage)}</style> damage</style>, plus an additional <style=cIsDamage>75% damage</style> on targets that are <style=cIsVoid>Nullified</style> or <style=cIsVoid>Tethered</style>.");
+
+			Bind(SKILL_PRIMARY_MINIGUN_NAME, "Perforate");
+			Bind(SKILL_PRIMARY_MINIGUN_DESC, $"The firerate of your claw has increased dramatically, but less spikes are shot per burst.");
 			#endregion
 
 			#region Secondary
 			Bind(SKILL_SECONDARY_NAME, "Bind");
-			Bind(SKILL_SECONDARY_DESC, $"Grab an enemy through the void, applying a force that tries to pull them directly in front of you. Deals <style=cIsDamage><style=cUserSetting>{Percentage(Configuration.BaseSecondaryDamage)}</style> damage</style> and inflicts <style=cIsVoid>Nullify</style>.");
+			Bind(SKILL_SECONDARY_DESC, $"Latch onto an enemy from a distance, applying a force that tries to pull them directly in front of you. Deals <style=cIsDamage><style=cUserSetting>{Percentage(Configuration.BaseSecondaryDamage)}</style> damage</style> and inflicts <style=cIsVoid>Nullify</style>. Heals <style=cIsHealing>{Percentage(Configuration.SecondaryHealAmountOnHit)} maximum health</style>.");
 			#endregion
 
 			#region Utility
@@ -145,12 +150,14 @@ namespace VoidJailerMod
 			Bind(SKILL_UTILITY_DESC, $"Propel yourself through the void at <style=cUserSetting>{Percentage(Configuration.UtilitySpeed)} movement speed</style> for <style=cUserSetting>{RoundTen(Configuration.UtilityDuration)} {LazyPluralize("second", Configuration.UtilityDuration)}</style>, healing <style=cIsHealing>{Percentage(Configuration.UtilityRegeneration)} maximum health</style>. Gain <style=cIsUtility>Immunity</style> and <style=cIsUtility>Invisibility</style> while away.");
 			#endregion
 
-			string commonSpecialStatDesc = $"Gain <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.SpecialArmorBoost)}</style> Armor</style>. <style=cIsVoid>Spike</style> projectiles cause <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
+			//string commonSpecialStatDesc = $"Gain <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.SpecialArmorBoost)}</style> Armor</style>. <style=cIsVoid>Spike</style> projectiles cause <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
+			string commonSpecialStatDesc = $"Gain <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.SpecialArmorBoost)}</style> Armor</style> and replace <style=cIsVoid>Spike</style> with <style=cIsVoid>Perforate</style>.";
+			string perforateDesc = $"<style=cIsUtility>Fully automatic.</style> Fire projectiles much more frequently, but with less projectiles per burst. Attacks inflict <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Mathf.CeilToInt(Configuration.BasePrimaryProjectileCount * SpikeMinigunSkill.BASE_BULLETS_PER_BURST_AS_FRAC)}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
 
 			#region Special
 			Bind(SKILL_SPECIAL_NAME, "Fury of the Warden");
-			Bind(SKILL_SPECIAL_DESC, $"Become enraged, gaining <style=cIsDamage>Fury</style> for <style=cUserSetting>{RoundTen(Configuration.SpecialDuration)}</style> seconds.");
-			Bind(SKILL_SPECIAL_KEYWORD, $"[ Fury ]\n{commonSpecialStatDesc}");
+			Bind(SKILL_SPECIAL_DESC, $"Become enraged, gaining <style=cIsDamage>Fury</style> for <style=cUserSetting>{RoundTen(Configuration.SpecialDuration)}</style> seconds. Replaces <style=cIsVoid>Spike</style> with <style=cIsVoid>Perforate</style>.");
+			Bind(SKILL_SPECIAL_KEYWORD, $"[ Fury ]\n{commonSpecialStatDesc}\n\n[ Perforate ]\n{perforateDesc}");
 			#endregion
 
 			#region Buffs
@@ -162,7 +169,7 @@ namespace VoidJailerMod
 		}
 
 		// TO SELF: The idea was that Void figured out survivors killed Providence, they want to take Mithrix, suspect the survivors are strong enough to do that too and so they try to work with the players
-		private const string THE_LORE = @"I'm sorry Gordon, you'll just have to wait until after the test. Then I can spend time writing a story.";
+		private const string THE_LORE = @"what is ligma";
 
 	}
 }

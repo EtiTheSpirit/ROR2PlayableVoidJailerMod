@@ -1,4 +1,5 @@
 ﻿using EntityStates;
+using UnityEngine.Networking;
 using VoidJailerMod.Buffs;
 
 namespace VoidJailerMod.Skills.Fury {
@@ -6,10 +7,12 @@ namespace VoidJailerMod.Skills.Fury {
 
 		public override void OnEnter() {
 			base.OnEnter();
-			if (isAuthority) {
+			if (NetworkServer.active) {
 				characterBody.AddTimedBuff(BuffProvider.Fury, Configuration.SpecialDuration);
 			}
-			outer.SetNextStateToMain();
+			if (isAuthority) {
+				outer.SetNextStateToMain();
+			}
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {

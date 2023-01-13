@@ -7,7 +7,7 @@ using UnityEngine;
 using VoidJailerMod.Damage;
 
 namespace VoidJailerMod.Skills.Spike {
-	public class SpikeSkill : BaseState {
+	public class SpikeShotgunSkill : BaseState {
 
 		public override void OnEnter() {
 			base.OnEnter();
@@ -44,8 +44,8 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void FixedUpdate() {
 			base.FixedUpdate();
 			if (fixedAge >= _totalDuration && isAuthority) {
-				Log.LogTrace($"Transitioning into a new instance of {nameof(SpikeCommonFireSequence)}!");
-				outer.SetNextState(new SpikeCommonFireSequence());
+				Log.LogTrace($"Transitioning into a new instance of {nameof(SpikeShotgunFireSequence)}!");
+				outer.SetNextState(new SpikeShotgunFireSequence());
 				return;
 			}
 		}

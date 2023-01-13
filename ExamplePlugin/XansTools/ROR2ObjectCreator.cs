@@ -82,7 +82,6 @@ namespace VoidJailerMod.XansTools {
 			ContentAddition.AddSkillFamily(skillLocator.utility._skillFamily);
 			ContentAddition.AddSkillFamily(skillLocator.special._skillFamily);
 		}
-
 		/// <summary>
 		/// Adds a skill variant to the given slot of a <see cref="CharacterBody"/>-containing <see cref="GameObject"/>.
 		/// Originally written by LuaFubuki but redone by Xan.
@@ -95,8 +94,8 @@ namespace VoidJailerMod.XansTools {
 		public static void AddSkill(GameObject bodyContainer, SkillDef definition, string slotName = "primary", int variantIndex = 0) {
 			Log.LogTrace($"Adding a skill to this character's {slotName} skill slot. Registering skill to ContentAddition...");
 			ContentAddition.AddSkillDef(definition);
+
 			SkillLocator skillLocator = bodyContainer.GetComponent<SkillLocator>();
-			skillLocator.allSkills = System.Array.Empty<GenericSkill>();
 			GenericSkill target;
 			slotName = slotName.ToLower();
 			switch (slotName) {
@@ -119,7 +118,7 @@ namespace VoidJailerMod.XansTools {
 			Log.LogTrace("Locating Skill Family...");
 			SkillFamily family = target.skillFamily;
 			SkillFamily.Variant[] variants = family.variants;
-			if (variants.Length >= variantIndex) {
+			if (variants.Length <= variantIndex) {
 				Log.LogTrace("Expanding Skill Family Variants array...");
 				System.Array.Resize(ref variants, variantIndex + 1);
 			}
@@ -129,6 +128,50 @@ namespace VoidJailerMod.XansTools {
 			variants[variantIndex] = newVariant;
 			family.variants = variants;
 			Log.LogTrace($"Done. Appended new skill in slot \"{slotName}\": {definition.skillNameToken}");
+		}
+
+		public static void AddNewHiddenSkill(GameObject bodyContainer, SkillDef definition) {
+			Log.LogTrace($"Adding a hidden skill to this character. Registering skill to ContentAddition...");
+			ContentAddition.AddSkillDef(definition);
+			SkillLocator skillLocator = bodyContainer.GetComponent<SkillLocator>();
+
+			Log.LogTrace("Setting Skill Family...");
+			SkillFamily family = ScriptableObject.CreateInstance<SkillFamily>();
+			SkillFamily.Variant[] variants = family.variants;
+			
+			Log.LogTrace("Resizing Skill Family Variants array...");
+			System.Array.Resize(ref variants, 1);
+			
+			SkillFamily.Variant newVariant = default;
+			newVariant.skillDef = definition;
+			newVariant.viewableNode = null;//new ViewablesCatalog.Node(definition.skillName + "_VIEW", false, null);
+			variants[0] = newVariant;
+			family.variants = variants;
+			ContentAddition.AddSkillFamily(family);
+			Log.LogTrace($"Done. Appended new hidden skill in no slot: {definition.skillNameToken}");
+		}
+
+		/// <summary>
+		/// This is used to swap transparency on the skin materials.
+		/// </summary>
+		public static readonly Material[] VoidJailerSkinMaterials = new Material[6];
+
+		/// <summary>
+		/// Globally modify the shader used on the Void Jailer to enable or disable dithered transparency.
+		/// This is done because it tends to become transparent in the character selection screen (which is not desirable, it must be opaque)
+		/// but also because it needs to be transparent in game (in which opaqueness causes problems for users where they cannot see in front of them).
+		/// </summary>
+		/// <param name="isTransparent"></param>
+		public static void GloballySetJailerSkinTransparency(bool isTransparent) {
+			for (int index = 0; index < VoidJailerSkinMaterials.Length; index++) {
+				if (isTransparent) {
+					VoidJailerSkinMaterials[index].EnableKeyword("DITHER");
+					VoidJailerSkinMaterials[index].SetFloat("_DitherOn", 1f);
+				} else {
+					VoidJailerSkinMaterials[index].DisableKeyword("DITHER");
+					VoidJailerSkinMaterials[index].SetFloat("_DitherOn", 0f);
+				}
+			}
 		}
 
 		/// <summary>
@@ -145,6 +188,10 @@ namespace VoidJailerMod.XansTools {
 			Material mtl0 = new Material(renderers[0].material);
 			Material mtl1 = new Material(renderers[1].material);
 			Material mtl2 = new Material(renderers[2].material);
+			VoidJailerSkinMaterials[0] = mtl0;
+			VoidJailerSkinMaterials[1] = mtl1;
+			VoidJailerSkinMaterials[2] = mtl2;
+
 
 			Log.LogTrace("Instantiating the default skin...");
 			LoadoutAPI.SkinDefInfo defaultSkin = new LoadoutAPI.SkinDefInfo {
@@ -200,6 +247,9 @@ namespace VoidJailerMod.XansTools {
 			mtl0 = new Material(allyRenderers[0].material);
 			mtl1 = new Material(allyRenderers[1].material);
 			mtl2 = new Material(allyRenderers[2].material);
+			VoidJailerSkinMaterials[3] = mtl0;
+			VoidJailerSkinMaterials[4] = mtl1;
+			VoidJailerSkinMaterials[5] = mtl2;
 
 			Log.LogTrace("Instantiating the ally skin...");
 			LoadoutAPI.SkinDefInfo ghostSkin = new LoadoutAPI.SkinDefInfo {

@@ -14,9 +14,9 @@ using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
 
 namespace VoidJailerMod.Skills.Spike {
-	public class SpikeCommonFireSequence : GenericProjectileBaseState {
+	public class SpikeShotgunFireSequence : GenericProjectileBaseState {
 		
-		public SpikeCommonFireSequence() {
+		public SpikeShotgunFireSequence() {
 			// projectilePrefab = ProjectileProvider.SpikeDart;
 			effectPrefab = EffectProvider.SpikeMuzzleFlash;
 			attackSoundString = "Play_voidJailer_m1_shoot";
@@ -95,7 +95,7 @@ namespace VoidJailerMod.Skills.Spike {
 		}
 
 		public override Ray ModifyProjectileAimRay(Ray aimRay) {
-			aimRay.origin += UnityEngine.Random.insideUnitSphere * (MaxRandomDistance * 0.8f);
+			aimRay.origin += UnityEngine.Random.insideUnitSphere * (MaxRandomDistance * 0.8f) / (Configuration.UseFullSizeCharacter ? 1f : 2f);
 			return aimRay;
 		}
 

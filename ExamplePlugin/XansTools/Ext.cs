@@ -1,9 +1,24 @@
 ﻿#nullable enable
 #pragma warning disable IDE0029
+using RoR2;
+using System.Linq;
 using UnityEngine;
 
 namespace VoidJailerMod.XansTools {
 	public static class Ext {
+
+		/// <summary>
+		/// Returns the CharacterBody of the client player running this instance of the game. May be null.
+		/// </summary>
+		public static CharacterBody? ClientPlayerBody {
+			get {
+				LocalUser client = LocalUserManager.GetFirstLocalUser();
+				if (client != null) {
+					return client.cachedBody;
+				}
+				return null;
+			}
+		}
 
 		/// <summary>
 		/// Implements null coalescense into Unity objects.<para/>

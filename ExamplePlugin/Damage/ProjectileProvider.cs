@@ -44,14 +44,14 @@ namespace VoidJailerMod.Damage {
 			}
 
 			Log.LogTrace("Adding NullBoosted damage type to dart...");
-			DamageAPI.ModdedDamageTypeHolderComponent cmp = SpikeDart.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+			ModdedDamageTypeHolderComponent cmp = SpikeDart.AddComponent<ModdedDamageTypeHolderComponent>();
 			cmp.Add(DamageTypeProvider.NullBoosted);
 
 
 			Log.LogTrace("Creating Fury Dart Extension (this type is fired with the Fury status effect)...");
 			ExplosiveSpikeDart = PrefabAPI.InstantiateClone(SpikeDart, "PlayerVoidJailerExplosiveDart");
 			ExplosiveSpikeDart.AddComponent<NetworkIdentity>();
-			ExplosiveSpikeDart.GetComponent<DamageAPI.ModdedDamageTypeHolderComponent>().Add(DamageTypeProvider.PerformsFastFracture);
+			ExplosiveSpikeDart.GetComponent<ModdedDamageTypeHolderComponent>().Add(DamageTypeProvider.PerformsFastFracture);
 
 
 			Log.LogTrace("Creating death bomb projectile...");

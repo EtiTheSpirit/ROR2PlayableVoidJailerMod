@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Networking;
 using VoidJailerMod.Effects;
 
 namespace VoidJailerMod.Skills.Spawn {
@@ -21,7 +22,9 @@ namespace VoidJailerMod.Skills.Spawn {
 		}
 
 		private void GrantSpawnAnimationImmunity(float duration) {
-			if (isAuthority) characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, duration);
+			if (NetworkServer.active) {
+				characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, duration);
+			}
 		}
 
 		public static string spawnFXTransformName => EntityStates.VoidJailer.SpawnState.spawnFXTransformName;

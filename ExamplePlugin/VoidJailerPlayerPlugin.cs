@@ -19,10 +19,9 @@ namespace VoidJailerMod {
 		public const string PLUGIN_GUID = PLUGIN_AUTHOR + "." + PLUGIN_NAME;
 		public const string PLUGIN_AUTHOR = "Xan";
 		public const string PLUGIN_NAME = "VoidJailerPlayerCharacter";
-		public const string PLUGIN_VERSION = "1.1.0";
+		public const string PLUGIN_VERSION = "1.2.0";
 		
 		public void Awake() {
-			Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.Full);
 			Log.Init(Logger);
 			Configuration.Init(Config);
 			Localization.Init();

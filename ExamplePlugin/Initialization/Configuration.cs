@@ -1,9 +1,14 @@
 ﻿using BepInEx.Configuration;
+using RiskOfOptions.OptionConfigs;
+using RiskOfOptions.Options;
+using RoR2;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using VoidJailerMod.XansTools;
 
 namespace VoidJailerMod {
 	public static class Configuration {
@@ -79,6 +84,16 @@ namespace VoidJailerMod {
 		/// The damage that the secondary attack does, as a proportion of the base damage.
 		/// </summary>
 		public static float BaseSecondaryDamage => _baseSecondaryDamage.Value;
+
+		/// <summary>
+		/// The amount of health you heal when hitting a target with Bind.
+		/// </summary>
+		public static float SecondaryHealAmountOnHit => _baseSecondarySap.Value;
+
+
+		public static float SecondaryNullifyDuration => _secondaryNullifyDuration.Value;
+
+		public static float SecondaryNullifyBossDuration => _secondaryNullifyBoss.Value;
 		#endregion
 
 		#region Utility
@@ -134,6 +149,20 @@ namespace VoidJailerMod {
 		/// </summary>
 		public static bool TraceLogging => _traceLogging.Value;
 
+		/// <summary>
+		/// The current camera offset preference.
+		/// </summary>
+		public static Vector3 CameraOffset => new Vector3(_camOffsetX.Value, _camOffsetY.Value, _camOffsetZ.Value);
+
+		/// <summary>
+		/// The offset of the camera's pivot point.
+		/// </summary>
+		public static float CameraPivotOffset => _cameraPivotOffset.Value;
+
+		public static float LocalTransparencyInCombat => _transparencyInCombat.Value;
+
+		public static float LocalTransparencyOutOfCombat => _transparencyOutOfCombat.Value;
+
 		#endregion
 
 		#endregion
@@ -184,6 +213,9 @@ namespace VoidJailerMod {
 
 		#region Secondary Attack
 		private static ConfigEntry<float> _baseSecondaryDamage;
+		private static ConfigEntry<float> _baseSecondarySap;
+		private static ConfigEntry<float> _secondaryNullifyDuration;
+		private static ConfigEntry<float> _secondaryNullifyBoss;
 		#endregion
 
 		#region Utility
@@ -205,6 +237,15 @@ namespace VoidJailerMod {
 		private static ConfigEntry<bool> _traceLogging;
 		#endregion
 
+		#region Camera
+		private static ConfigEntry<float> _camOffsetX;
+		private static ConfigEntry<float> _camOffsetY;
+		private static ConfigEntry<float> _camOffsetZ;
+		private static ConfigEntry<float> _cameraPivotOffset;
+		private static ConfigEntry<int> _transparencyInCombat;
+		private static ConfigEntry<int> _transparencyOutOfCombat;
+		#endregion
+
 		#endregion
 
 		#endregion
@@ -223,6 +264,8 @@ namespace VoidJailerMod {
 		private const string FMT_LEVELED = "For each level the player earns, their {0} increases by this amount.";
 		private const string FMT_DAMAGE = "This value times the base damage determines the damage done by {0}.";
 		private const string FMT_COOLDOWN = "The amount of time, in seconds, that the user must wait before {0} recharges.";
+		private const string FMT_COORDINATE = "The {0} offset of the camera when using this character.\n\nNOTE: THIS VALUE IS FOR THE FULL SIZE CHARACTER (IT IS DIVIDED BY 2 FOR THE SMALL CHARACTER)";
+		private const string FMT_TRANSPARENCY = "The transparency of the character when you are {0}.\n\nThis can be used to make it easier to see enemies by making your body transparent to prevent it from getting in the way.\n\nA value of 0 means fully opaque, and a value of 100 means as invisible as possible.";
 
 #pragma warning disable CS0618
 		/// <summary>
@@ -249,12 +292,62 @@ namespace VoidJailerMod {
 			return new AcceptableValueRange<int>(min, int.MaxValue);
 		}
 
+		private const float CAM_RANGE = 30f;
+		private static ConfigEntry<float> MakeCameraCoordEntry(string axis, string axisDesc, float defaultValue) {
+			ConfigEntry<float> entry = Bind("0. Mod Meta Settings", $"Camera {axis} Offset", defaultValue, StaticDeclareConfigDescription(string.Format(FMT_COORDINATE, $"{axis} ({axisDesc})"), new AcceptableValueRange<float>(-CAM_RANGE, CAM_RANGE)));
+			RiskOfOptions.ModSettingsManager.AddOption(new StepSliderOption(entry, new StepSliderConfig {
+				name = entry.Definition.Key,
+				description = entry.Description.Description,
+				category = "Camera and Visuals",
+				formatString = "{0}m",
+				min = -CAM_RANGE,
+				max = CAM_RANGE,
+				increment = 0.125f,
+				restartRequired = false
+			}));
+			return entry;
+		}
+
+		private static ConfigEntry<int> MakeFloat01Entry(string name, string desc, int defVal) {
+			ConfigEntry<int> entry = Bind("0. Mod Meta Settings", name, defVal, StaticDeclareConfigDescription(desc, new AcceptableValueRange<int>(0, 100)));
+			RiskOfOptions.ModSettingsManager.AddOption(new IntSliderOption(entry, new IntSliderConfig {
+				name = name,
+				description = desc,
+				category = "Camera and Visuals",
+				min = 0,
+				max = 100,
+				formatString = "{0}",
+				restartRequired = false
+			}));
+			return entry;
+		}
+
 		internal static void Init(ConfigFile cfg) {
 			if (_cfg != null) throw new InvalidOperationException($"{nameof(Configuration)} has already been initialized!");
 			_cfg = cfg;
 
 			// The odd one out:
 			_traceLogging = cfg.Bind("0. Mod Meta Settings", "Trace Logging", false, "If true, trace logging is enabled. Your console will practically be spammed as the mod gives status updates on every little thing it's doing, but it will help to diagnose weird issues. Consider using this when bug hunting!");
+			_camOffsetX = MakeCameraCoordEntry("X", "-left / +right", 0f);
+			_camOffsetY = MakeCameraCoordEntry("Y", "-down / +up", 4f);
+			_camOffsetZ = MakeCameraCoordEntry("Z", "-backward / +forward", -14f);
+
+			_cameraPivotOffset = cfg.Bind("0. Mod Meta Settings", "Camera Pivot Offset", -1.75f, StaticDeclareConfigDescription("The vertical offset of the camera's pivot point, or, the point it rotates around. NOTE: THIS VALUE IS FOR THE FULL SIZE CHARACTER (IT IS DIVIDED BY 2 FOR THE SMALL CHARACTER)", new AcceptableValueRange<float>(-4, 4)));
+			RiskOfOptions.ModSettingsManager.AddOption(new StepSliderOption(_cameraPivotOffset, new StepSliderConfig {
+				name = _cameraPivotOffset.Definition.Key,
+				description = _cameraPivotOffset.Description.Description,
+				category = "Camera and Visuals",
+				formatString = "{0}m",
+				min = -4,
+				max = 4,
+				increment = 0.125f,
+				restartRequired = false
+			}));
+
+			_transparencyInCombat = MakeFloat01Entry("Transparency In Danger", string.Format(FMT_TRANSPARENCY, "in combat"), 75);
+			_transparencyOutOfCombat = MakeFloat01Entry("Transparency Out Of Danger", string.Format(FMT_TRANSPARENCY, "not in combat"), 25);
+
+			cfg.SettingChanged += OnSettingChanged;
 
 			// TODO: I would *like* to get RiskOfOptions support but there are two critical issues preventing that
 
@@ -281,6 +374,9 @@ namespace VoidJailerMod {
 			// Cooldown?
 
 			_baseSecondaryDamage = Bind("3b. Character Secondary", "Secondary Damage", 0.8f, StaticDeclareConfigDescription(string.Format(FMT_DAMAGE, "Bind"), MinOnlyF()));
+			_baseSecondarySap = Bind("3b. Character Secondary", "Lifesteal Percentage", 0.05f, StaticDeclareConfigDescription("The amount of health that you heal when using Bind, as a percentage of your maximum health.", new AcceptableValueRange<float>(0f, 1f)));
+			_secondaryNullifyDuration = Bind("3b. Character Secondary", "Nullify Duration", 6f, StaticDeclareConfigDescription("The duration that Nullify lasts for on enemies when hit with Bind.", MinOnlyF(0)));
+			_secondaryNullifyBoss = Bind("3b. Character Secondary", "Nullify Duration (Bosses)", 3f, StaticDeclareConfigDescription("The duration that Nullify lasts for on bosses hit with Bind. Set to 0 to prevent it entirely.", MinOnlyF(0)));
 
 			_utilitySpeed = Bind("3c. Character Utility", "Dive Speed", 4f, StaticDeclareConfigDescription("The speed at which Dive moves you, as a multiplied factor of your current movement speed.", MinOnlyF()));
 			_utilityRegeneration = Bind("3c. Character Utility", "Dive Health Regeneration", 0.1f, StaticDeclareConfigDescription("The amount of health that dive regenerates, as a percentage.", new AcceptableValueRange<float>(0f, 1f)));
@@ -298,10 +394,31 @@ namespace VoidJailerMod {
 			_baseAttackSpeed = Bind("4. Character Combat", "Base Attack Speed", 1.45f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "attack rate"), MinOnlyF()));
 			_levelAttackSpeed = Bind("4. Character Combat", "Leveled Attack Speed", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "attack rate"), MinOnlyF()));
 
-			_useFullSizeCharacter = Bind("5. Character Specifics", "Use Full Size Jailer", false, "By default, the mod sets the Jailer's scale to 50% that of its natural size. Turning this on will make you the same size as a normal Reaver. **WARNING** This setting is known to cause collision issues. Some areas are impossible to reach.");
+			_useFullSizeCharacter = Bind("5. Character Specifics", "Use Full Size Jailer", false, "This MUST be synchronized between players in multiplayer, or people will sink into the floor / float! By default, the mod sets the Jailer's scale to 50% that of its natural size. Turning this on will make you the same size as a normal Jailer. **WARNING** This setting is known to cause collision issues. Some areas are impossible to reach.");
 			_voidImmunity = Bind("5. Character Specifics", "Void Immunity", true, "If enabled, the player will be immune to damage from a void atmosphere and will not have the fog effect applied to them. **WARNING** There isn't actually a way to tell if you are taking damage from the void. The way I do it is an educated guess. This means you may actually resist completely valid damage types from some enemies, but I have yet to properly test this.");
 
+			RiskOfOptions.ModSettingsManager.AddOption(new CheckBoxOption(_useFullSizeCharacter, new CheckBoxConfig {
+				name = "Use Full Size Character",
+				description = "<style=cDeath>This MUST be synchronized between players in multiplayer, or people will sink into the floor / float!</style>\n\nBy default, the mod sets the Jailer's scale to 50% that of its natural size. Turning this on will make you the same size as a normal Jailer.\n\n<style=cIsDamage>This setting is known to cause collision issues. Additionally, some areas are impossible to reach, making it possible to softlock yourself.</style>",
+				category = "Character",
+				restartRequired = true
+			}));
+
 			Log.LogInfo("User configs initialized.");
+		}
+
+		private static void OnSettingChanged(object sender, SettingChangedEventArgs e) {
+			if (e.ChangedSetting == _camOffsetX || e.ChangedSetting == _camOffsetY || e.ChangedSetting == _camOffsetZ || e.ChangedSetting == _cameraPivotOffset) {
+				CharacterBody clientPlayerBody = Ext.ClientPlayerBody;
+				if (clientPlayerBody) {
+					CameraTargetParams tParams = clientPlayerBody.GetComponent<CameraTargetParams>();
+					if (tParams) {
+						tParams.cameraParams.data.idealLocalCameraPos = CameraOffset / (UseFullSizeCharacter ? 1f : 2f);
+						tParams.cameraParams.data.pivotVerticalOffset = CameraPivotOffset / (UseFullSizeCharacter ? 1f : 2f);
+					}
+				}
+
+			}
 		}
 #pragma warning restore CS0618
 

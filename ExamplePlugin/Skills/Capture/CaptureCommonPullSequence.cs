@@ -51,7 +51,10 @@ namespace VoidJailerMod.Skills.Capture {
 						}
 					}
 					if (RoR2Content.Buffs.Nullified) {
-						body.AddTimedBuff(RoR2Content.Buffs.Nullified, DebuffDuration);
+						float duration = body.isBoss ? Configuration.SecondaryNullifyBossDuration : Configuration.SecondaryNullifyDuration;
+						if (duration > 0) {
+							body.AddTimedBuff(RoR2Content.Buffs.Nullified, duration);
+						}
 					}
 					float speed = Trajectory.CalculateInitialYSpeedForHeight(Mathf.Abs(PullMinDistance - distance)) * Mathf.Sign(PullMinDistance - distance);
 					direction *= speed;
@@ -66,6 +69,7 @@ namespace VoidJailerMod.Skills.Capture {
 					targetHurtBox.healthComponent.TakeDamageForce(direction * mass, true, true);
 					targetHurtBox.healthComponent.TakeDamage(damageInfo);
 					GlobalEventManager.instance.OnHitEnemy(damageInfo, targetHurtBox.healthComponent.gameObject);
+					characterBody.healthComponent.Heal(Configuration.SecondaryHealAmountOnHit * characterBody.maxHealth, default);
 					if (PullTracerPrefab) {
 						Vector3 position = targetHurtBox.transform.position;
 						Vector3 start = characterBody.corePosition;
@@ -105,11 +109,11 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public string EnterSoundString { get; } = "Play_voidJailer_m2_shoot";
 
-		public float PullFieldOfView { get; } = 10f;
+		public float PullFieldOfView { get; } = 17.5f;
 
-		public float PullMinDistance { get; } = 1;
+		public float PullMinDistance { get; } = 1f;
 
-		public float PullMaxDistance { get; } = 50;
+		public float PullMaxDistance { get; } = 100f;
 
 		public GameObject PullTracerPrefab { 
 			get {
@@ -122,8 +126,6 @@ namespace VoidJailerMod.Skills.Capture {
 		private static GameObject _pullTracer = null;
 
 		public float PullLiftVelocity { get; } = 3;
-
-		public float DebuffDuration { get; } = 6;
 
 		public float ProcCoefficient { get; } = 0;
 
@@ -139,7 +141,6 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public string MuzzleString { get; set; }
 
-		// Token: 0x04000738 RID: 1848
 		private float Duration { get; set; }
 	}
 }

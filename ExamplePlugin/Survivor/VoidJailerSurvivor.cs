@@ -16,6 +16,7 @@ using VoidJailerMod.Skills.Dive;
 using VoidJailerMod.Skills.Fury;
 using VoidJailerMod.Skills.Spike;
 using VoidJailerMod.Survivor.Interop;
+using VoidJailerMod.Survivor.Render;
 using VoidJailerMod.XansTools;
 using CharacterBody = RoR2.CharacterBody;
 using Interactor = RoR2.Interactor;
@@ -26,6 +27,9 @@ namespace VoidJailerMod.Survivor {
 		private static GameObject playerBodyPrefab;
 
 		public static SurvivorDef Jailer { get; private set; }
+
+		public static SkillDef DefaultPrimary { get; private set; }
+		public static SkillDef MinigunPrimary { get; private set; }
 
 		// TODO: Try to allow runtime edits by using one of the popular settings mods?
 		// Why can't this be like MelonLoader where settings are just exposed out of the box
@@ -118,8 +122,8 @@ namespace VoidJailerMod.Survivor {
 				camTargetParams = body.gameObject.AddComponent<CameraTargetParams>();
 			}
 			camTargetParams.cameraParams ??= ScriptableObject.CreateInstance<CharacterCameraParams>();
-			camTargetParams.cameraParams.data.idealLocalCameraPos = new Vector3(2.6f, 2.6f, -16f) / (Configuration.UseFullSizeCharacter ? 1f : 2f);
-			camTargetParams.cameraParams.data.pivotVerticalOffset = -0.8f;
+			camTargetParams.cameraParams.data.idealLocalCameraPos = Configuration.CameraOffset / (Configuration.UseFullSizeCharacter ? 1f : 2f);
+			camTargetParams.cameraParams.data.pivotVerticalOffset = Configuration.CameraPivotOffset / (Configuration.UseFullSizeCharacter ? 1f : 2f);
 			Log.LogTrace("Done setting up interactions and scale dependent properties.");
 			#endregion
 
@@ -138,10 +142,10 @@ namespace VoidJailerMod.Survivor {
 			Log.LogTrace("Finished registering passive details...");
 			#endregion
 
-			#region Primary
+			#region Primary (Shotgun)
 			Log.LogTrace("Primary Skill (\"Spike\")...");
 			SkillDef spike = ScriptableObject.CreateInstance<SkillDef>();
-			spike.activationState = UtilCreateSerializableAndNetRegister<SpikeSkill>();
+			spike.activationState = UtilCreateSerializableAndNetRegister<SpikeShotgunSkill>();
 			spike.activationStateMachineName = "Weapon";
 			spike.baseMaxStock = 1;
 			spike.baseRechargeInterval = 0f;
@@ -157,15 +161,44 @@ namespace VoidJailerMod.Survivor {
 			spike.rechargeStock = spike.baseMaxStock;
 			spike.requiredStock = 1;
 			spike.stockToConsume = 1;
-			spike.skillNameToken = Localization.SKILL_PRIMARY_NAME;
-			spike.skillDescriptionToken = Localization.SKILL_PRIMARY_DESC;
+			spike.skillNameToken = Localization.SKILL_PRIMARY_SHOTGUN_NAME;
+			spike.skillDescriptionToken = Localization.SKILL_PRIMARY_SHOTGUN_DESC;
+			DefaultPrimary = spike;
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, spike, "primary", 0);
 
-			Log.LogTrace($"Registering intermediary state {nameof(SpikeCommonFireSequence)}");
-			ContentAddition.AddEntityState<SpikeCommonFireSequence>(out _);
+			Log.LogTrace($"Registering intermediary state {nameof(SpikeShotgunFireSequence)}");
+			ContentAddition.AddEntityState<SpikeShotgunFireSequence>(out _);
 
 			Log.LogTrace("Finished registering Spike.");
+			#endregion
+
+			#region Primary (Minigun)
+			Log.LogTrace("Alt Primary Skill (\"Perforate\")...");
+			SkillDef perforate = ScriptableObject.CreateInstance<SkillDef>();
+			perforate.activationState = UtilCreateSerializableAndNetRegister<SpikeMinigunSkill>();
+			perforate.activationStateMachineName = "Weapon";
+			perforate.baseMaxStock = 1;
+			perforate.baseRechargeInterval = 0.5f;
+			perforate.beginSkillCooldownOnSkillEnd = false;
+			perforate.canceledFromSprinting = true;
+			perforate.cancelSprintingOnActivation = true;
+			perforate.dontAllowPastMaxStocks = true;
+			perforate.forceSprintDuringState = false;
+			perforate.fullRestockOnAssign = true;
+			perforate.interruptPriority = InterruptPriority.Any;
+			perforate.isCombatSkill = true;
+			perforate.mustKeyPress = false;
+			perforate.rechargeStock = perforate.baseMaxStock;
+			perforate.requiredStock = 1;
+			perforate.stockToConsume = 1;
+			perforate.skillNameToken = Localization.SKILL_PRIMARY_MINIGUN_NAME;
+			perforate.skillDescriptionToken = Localization.SKILL_PRIMARY_MINIGUN_DESC;
+			MinigunPrimary = perforate;
+			// icon
+			ROR2ObjectCreator.AddNewHiddenSkill(playerBodyPrefab, perforate);
+			Log.LogTrace("Finished registering Perforate.");
+			
 			#endregion
 
 			#region Secondary
@@ -192,7 +225,7 @@ namespace VoidJailerMod.Survivor {
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bind, "secondary", 0);
 
-			Log.LogTrace($"Registering intermediary states {nameof(SpikeCommonFireSequence)} and {nameof(ExitCapture)}");
+			Log.LogTrace($"Registering intermediary states {nameof(SpikeShotgunFireSequence)} and {nameof(ExitCapture)}");
 			ContentAddition.AddEntityState<CaptureCommonPullSequence>(out _);
 			ContentAddition.AddEntityState<ExitCapture>(out _);
 
@@ -285,8 +318,10 @@ namespace VoidJailerMod.Survivor {
 			On.RoR2.HealthComponent.TakeDamage += DoFakeVoidDeath;
 			On.RoR2.HealthComponent.TakeDamage += DoFuryFracture;
 			On.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string += OnUpdatingVFX;
-			// On.RoR2.CharacterMaster.SpawnBody += OnSpawnBody;
-			
+			On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.RebuildMannequinInstance += OnRebuildMannequinInstance;
+			On.RoR2.CharacterBody.Awake += OnCharacterBodyAwake;
+			On.RoR2.CharacterBody.OnBuffFirstStackGained += OnBuffGained;
+			On.RoR2.CharacterBody.OnBuffFinalStackLost += OnBuffLost;
 
 			BodyCatalog.availability.CallWhenAvailable(() => {
 				// Register to HPBarAPI.
@@ -297,13 +332,6 @@ namespace VoidJailerMod.Survivor {
 			#endregion
 		}
 
-#pragma warning disable Publicizer001
-		private static void OnUpdatingVFX(On.RoR2.CharacterBody.orig_UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string originalMethod, CharacterBody @this, ref TemporaryVisualEffect tempEffect, GameObject tempEffectPrefab, float effectRadius, bool active, string childLocatorOverride) {
-			if (tempEffectPrefab == CharacterBody.AssetReferences.noCooldownEffectPrefab) {
-				active = active || @this.HasBuff(BuffProvider.Fury);
-			}
-			originalMethod(@this, ref tempEffect, tempEffectPrefab, effectRadius, active, childLocatorOverride);
-		}
 
 		/// <summary>
 		/// Utility: Use <see cref="ContentAddition.AddEntityState{T}(out bool)"/> to register the provided entity state type, then return a new instance of <see cref="SerializableEntityStateType"/> using the same type.
@@ -311,19 +339,75 @@ namespace VoidJailerMod.Survivor {
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		private static SerializableEntityStateType UtilCreateSerializableAndNetRegister<T>() where T : EntityState {
+			// java when the typeof(T)
+			// when
+			//  the when the t
+			// t
 			Log.LogTrace($"Registering EntityState {typeof(T).FullName} and returning a new instance of {nameof(SerializableEntityStateType)} of that type...");
 			ContentAddition.AddEntityState<T>(out _);
 			return new SerializableEntityStateType(typeof(T));
 		}
 
+
+#pragma warning disable Publicizer001
+
+		private static void OnBuffGained(On.RoR2.CharacterBody.orig_OnBuffFirstStackGained originalMethod, CharacterBody @this, BuffDef buffDef) {
+			originalMethod(@this, buffDef);
+			if (buffDef == BuffProvider.Fury) {
+				@this.skillLocator.primary.SetSkillOverride(@this, MinigunPrimary, GenericSkill.SkillOverridePriority.Upgrade);
+			}
+		}
+
+		private static void OnBuffLost(On.RoR2.CharacterBody.orig_OnBuffFinalStackLost originalMethod, CharacterBody @this, BuffDef buffDef) {
+			originalMethod(@this, buffDef);
+			if (buffDef == BuffProvider.Fury) {
+				@this.skillLocator.primary.UnsetSkillOverride(@this, MinigunPrimary, GenericSkill.SkillOverridePriority.Upgrade);
+			}
+		}
+
+		#region Dynamic Transparency Hack and Dynamic Camera
 		/// <summary>
-		/// Intent: Render brainstalks when the player has the "Fury" effect. This does not work properly. An IL edit to the line in vanilla code for brainstalks itself may be necessary. I would like to avoid this.
+		/// Intent: When showing the Void Jailer in the character selection screen, make the body material opaque.
 		/// </summary>
 		/// <param name="originalMethod"></param>
 		/// <param name="this"></param>
-		private static void UpdateAllTempVFX(On.RoR2.CharacterBody.orig_UpdateAllTemporaryVisualEffects originalMethod, CharacterBody @this) {
+		private static void OnRebuildMannequinInstance(On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.orig_RebuildMannequinInstance originalMethod, RoR2.SurvivorMannequins.SurvivorMannequinSlotController @this) {
 			originalMethod(@this);
-			@this.UpdateSingleTemporaryVisualEffect(ref @this.noCooldownEffectInstance, CharacterBody.AssetReferences.noCooldownEffectPrefab, @this.radius, @this.HasBuff(BuffProvider.Fury) || @this.HasBuff(RoR2Content.Buffs.NoCooldowns), "Head");
+			if (@this.mannequinInstanceTransform != null && @this.currentSurvivorDef == Jailer) {
+				ROR2ObjectCreator.GloballySetJailerSkinTransparency(false);
+			}
+		}
+
+		/// <summary>
+		/// Intent: When spawning the Void Jailer in the game, make the body material transparent when needed.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		private static void OnCharacterBodyAwake(On.RoR2.CharacterBody.orig_Awake originalMethod, CharacterBody @this) {
+			originalMethod(@this);
+			if (@this.baseNameToken == Localization.SURVIVOR_NAME) {
+				ROR2ObjectCreator.GloballySetJailerSkinTransparency(true);
+				CameraTargetParams tParams = @this.GetComponent<CameraTargetParams>();
+				if (tParams) {
+					tParams.cameraParams.data.idealLocalCameraPos = Configuration.CameraOffset / (Configuration.UseFullSizeCharacter ? 1 : 2);
+					tParams.cameraParams.data.pivotVerticalOffset = Configuration.CameraPivotOffset / (Configuration.UseFullSizeCharacter ? 1 : 2);
+				}
+
+				@this.gameObject.AddComponent<TransparencyController>();
+			}
+		}
+		#endregion
+
+		/// <summary>
+		/// Intent: Render brainstalks when the player has the "Fury" effect.
+		/// </summary>
+		/// <param name="originalMethod"></param>
+		/// <param name="this"></param>
+		private static void OnUpdatingVFX(On.RoR2.CharacterBody.orig_UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string originalMethod, CharacterBody @this, ref TemporaryVisualEffect tempEffect, GameObject tempEffectPrefab, float effectRadius, bool active, string childLocatorOverride) {
+			if (tempEffectPrefab == CharacterBody.AssetReferences.noCooldownEffectPrefab) {
+				active = active || @this.HasBuff(BuffProvider.Fury);
+			}
+			originalMethod(@this, ref tempEffect, tempEffectPrefab, effectRadius, active, childLocatorOverride);
 		}
 
 		/// <summary>
