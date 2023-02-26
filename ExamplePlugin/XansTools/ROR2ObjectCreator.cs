@@ -91,6 +91,7 @@ namespace VoidJailerMod.XansTools {
 		/// <param name="slotName">The name of the slot. This must be <c>primary</c>, <c>secondary</c>, <c>utility</c>, or <c>special</c>.</param>
 		/// <param name="variantIndex">The index of this variant. If this index is larger than the number of variants the <see cref="SkillFamily"/> can contain, its array is resized.</param>
 		/// <exception cref="System.ArgumentOutOfRangeException">If <paramref name="slotName"/> is not valid.</exception>
+#pragma warning disable IDE0066 // The version of C# we are using does not support switch expressions.
 		public static void AddSkill(GameObject bodyContainer, SkillDef definition, string slotName = "primary", int variantIndex = 0) {
 			Log.LogTrace($"Adding a skill to this character's {slotName} skill slot. Registering skill to ContentAddition...");
 			ContentAddition.AddSkillDef(definition);
@@ -129,11 +130,11 @@ namespace VoidJailerMod.XansTools {
 			family.variants = variants;
 			Log.LogTrace($"Done. Appended new skill in slot \"{slotName}\": {definition.skillNameToken}");
 		}
+#pragma warning restore IDE0066
 
 		public static void AddNewHiddenSkill(GameObject bodyContainer, SkillDef definition) {
 			Log.LogTrace($"Adding a hidden skill to this character. Registering skill to ContentAddition...");
 			ContentAddition.AddSkillDef(definition);
-			SkillLocator skillLocator = bodyContainer.GetComponent<SkillLocator>();
 
 			Log.LogTrace("Setting Skill Family...");
 			SkillFamily family = ScriptableObject.CreateInstance<SkillFamily>();

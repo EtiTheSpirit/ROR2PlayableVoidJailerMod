@@ -6,8 +6,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
     <Version>1.1.0</Version>
-    <FileVersion></FileVersion>
-    <AssemblyVersion></AssemblyVersion>
+    <FileVersion>1.2.1</FileVersion>
+    <AssemblyVersion>1.2.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

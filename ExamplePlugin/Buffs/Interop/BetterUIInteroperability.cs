@@ -30,9 +30,7 @@ namespace VoidJailerMod.Buffs.Interop {
 					MethodInfo buffRegisterMtd = betterUIBuffs.GetMethod("RegisterBuffInfo", new Type[] { typeof(BuffDef), typeof(string), typeof(string) });
 					if (buffRegisterMtd != null) {
 						Log.LogTrace("Found the method for BetterUI.Buffs::RegisterBuffInfo");
-						RegisterBuffInfoMethod = (buff, name, desc) => {
-							buffRegisterMtd.Invoke(null, new object[] { buff, name, desc });
-						};
+						RegisterBuffInfoMethod = (RegisterBuffInfoDelegate)buffRegisterMtd.CreateDelegate(typeof(RegisterBuffInfoDelegate));
 					}
 				}
 			} catch (Exception err) {
@@ -45,7 +43,7 @@ namespace VoidJailerMod.Buffs.Interop {
 		}
 
 		public static void RegisterBuffInfo(BuffDef def, string name, string description) {
-			if (RegisterBuffInfoMethod != null) RegisterBuffInfoMethod.Invoke(def, name, description);
+			RegisterBuffInfoMethod?.Invoke(def, name, description);
 		}
 
 	}

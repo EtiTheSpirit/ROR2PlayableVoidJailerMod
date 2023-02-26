@@ -29,6 +29,7 @@ namespace VoidJailerMod.Survivor {
 		public static SurvivorDef Jailer { get; private set; }
 
 		public static SkillDef DefaultPrimary { get; private set; }
+
 		public static SkillDef MinigunPrimary { get; private set; }
 
 		// TODO: Try to allow runtime edits by using one of the popular settings mods?
@@ -79,7 +80,8 @@ namespace VoidJailerMod.Survivor {
 			UpdateSettings(body);
 			body.bodyColor = new Color(0.867f, 0.468f, 0.776f);
 			body.baseNameToken = Localization.SURVIVOR_NAME;
-			
+			body.subtitleNameToken = Localization.SURVIVOR_UMBRA;
+
 			body.bodyFlags = CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.Void | CharacterBody.BodyFlags.ImmuneToVoidDeath;
 			// Immunity to void death is intentional. This is because it deletes the character model, which we don't want.
 			// Instead, we manually intercept the damage and apply it as a non-voiddeath source. This way it can kill the player and play the death animation without screwing up
@@ -155,7 +157,7 @@ namespace VoidJailerMod.Survivor {
 			spike.dontAllowPastMaxStocks = true;
 			spike.forceSprintDuringState = false;
 			spike.fullRestockOnAssign = true;
-			spike.interruptPriority = InterruptPriority.Any;
+			spike.interruptPriority = InterruptPriority.Skill;
 			spike.isCombatSkill = true;
 			spike.mustKeyPress = false;
 			spike.rechargeStock = spike.baseMaxStock;
@@ -181,12 +183,12 @@ namespace VoidJailerMod.Survivor {
 			perforate.baseMaxStock = 1;
 			perforate.baseRechargeInterval = 0.5f;
 			perforate.beginSkillCooldownOnSkillEnd = false;
-			perforate.canceledFromSprinting = true;
-			perforate.cancelSprintingOnActivation = true;
+			perforate.canceledFromSprinting = false;
+			perforate.cancelSprintingOnActivation = false;
 			perforate.dontAllowPastMaxStocks = true;
 			perforate.forceSprintDuringState = false;
 			perforate.fullRestockOnAssign = true;
-			perforate.interruptPriority = InterruptPriority.Any;
+			perforate.interruptPriority = InterruptPriority.PrioritySkill;
 			perforate.isCombatSkill = true;
 			perforate.mustKeyPress = false;
 			perforate.rechargeStock = perforate.baseMaxStock;
@@ -214,7 +216,7 @@ namespace VoidJailerMod.Survivor {
 			bind.dontAllowPastMaxStocks = true;
 			bind.forceSprintDuringState = false;
 			bind.fullRestockOnAssign = true;
-			bind.interruptPriority = InterruptPriority.Any;
+			bind.interruptPriority = InterruptPriority.Skill;
 			bind.isCombatSkill = true;
 			bind.mustKeyPress = true;
 			bind.rechargeStock = bind.baseMaxStock;
@@ -271,7 +273,7 @@ namespace VoidJailerMod.Survivor {
 			rage.dontAllowPastMaxStocks = false;
 			rage.forceSprintDuringState = false;
 			rage.fullRestockOnAssign = true;
-			rage.interruptPriority = InterruptPriority.Any;
+			rage.interruptPriority = InterruptPriority.PrioritySkill;
 			rage.isCombatSkill = false;
 			rage.mustKeyPress = false;
 			rage.rechargeStock = rage.baseMaxStock;
@@ -419,7 +421,7 @@ namespace VoidJailerMod.Survivor {
 		private static void InterceptTakeDamageForNullBuff(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
 			if (damageInfo.HasModdedDamageType(DamageTypeProvider.NullBoosted) && (@this.body.HasBuff(DLC1Content.Buffs.JailerTether) || @this.body.HasBuff(RoR2Content.Buffs.Nullified))) {
 				damageInfo.damageColorIndex = DamageColorIndex.WeakPoint;
-				damageInfo.damage *= 1.75f;
+				damageInfo.damage += (damageInfo.damage * Configuration.NullifiedDamageBoost);
 			}
 			originalMethod(@this, damageInfo);
 		}

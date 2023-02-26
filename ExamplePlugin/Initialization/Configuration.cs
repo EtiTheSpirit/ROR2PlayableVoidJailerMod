@@ -63,6 +63,11 @@ namespace VoidJailerMod {
 		public static float BasePrimaryDamage => _basePrimaryDamage.Value;
 
 		/// <summary>
+		/// The multiplier applied to damage done to nullified targets when hit with the primary, to encourage using the secondary.
+		/// </summary>
+		public static float NullifiedDamageBoost => _nullifiedDamageBoost.Value;
+
+		/// <summary>
 		/// The amount of projectiles that the primary fire shoots.
 		/// </summary>
 		public static int BasePrimaryProjectileCount => _basePrimaryProjectiles.Value;
@@ -207,6 +212,7 @@ namespace VoidJailerMod {
 
 		#region Primary Attack
 		private static ConfigEntry<float> _basePrimaryDamage;
+		private static ConfigEntry<float> _nullifiedDamageBoost;
 		private static ConfigEntry<int> _basePrimaryProjectiles;
 		private static ConfigEntry<AimHelperType> _primaryProjectileBehavior;
 		#endregion
@@ -369,14 +375,15 @@ namespace VoidJailerMod {
 			_levelJumpPower = Bind("2. Character Agility", "Leveled Jump Power", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "amount of upward jump force"), MinOnlyF()));
 
 			_basePrimaryDamage = Bind("3a. Character Primary", "Primary Damage", 2f, StaticDeclareConfigDescription(string.Format(FMT_DAMAGE, "Spike"), MinOnlyF()));
+			_nullifiedDamageBoost = Bind("3a. Character Primary", "Nullified Damage Boost", 1.25f, StaticDeclareConfigDescription("When a target is nullified (such as with Bind, the Tentabauble, or by a Reaver), the damage of Spike (and Perforate) gets multiplied by this value and then added to itself, such that a value of 0 provides no damage boost, a value of 1 adds the damage to (1 * itself) (this doubles it), 2 adds the damage to (2 * itself) (this triples it), so on.", MinOnlyF(0)));
 			_basePrimaryProjectiles = Bind("3a. Character Primary", "Default Projectile Count", 12, StaticDeclareConfigDescription("The amount of Projectiles used in the Spike ability.", MinOnlyI(1)));
 			_primaryProjectileBehavior = Bind("3a. Character Primary", "Projectile Behavior", AimHelperType.HomingProjectiles, StaticDeclareConfigDescription("All other survivors with slow projectiles usually accompany them with auto-aim/homing. This setting can be used to alter the Jailer's projectiles to be faster, to follow targets, or both."));
 			// Cooldown?
 
 			_baseSecondaryDamage = Bind("3b. Character Secondary", "Secondary Damage", 0.8f, StaticDeclareConfigDescription(string.Format(FMT_DAMAGE, "Bind"), MinOnlyF()));
-			_baseSecondarySap = Bind("3b. Character Secondary", "Lifesteal Percentage", 0.05f, StaticDeclareConfigDescription("The amount of health that you heal when using Bind, as a percentage of your maximum health.", new AcceptableValueRange<float>(0f, 1f)));
-			_secondaryNullifyDuration = Bind("3b. Character Secondary", "Nullify Duration", 6f, StaticDeclareConfigDescription("The duration that Nullify lasts for on enemies when hit with Bind.", MinOnlyF(0)));
-			_secondaryNullifyBoss = Bind("3b. Character Secondary", "Nullify Duration (Bosses)", 3f, StaticDeclareConfigDescription("The duration that Nullify lasts for on bosses hit with Bind. Set to 0 to prevent it entirely.", MinOnlyF(0)));
+			_baseSecondarySap = Bind("3b. Character Secondary", "Lifesteal Percentage", 0.2f, StaticDeclareConfigDescription("The amount of health that you heal when using Bind, as a percentage of your maximum health.", new AcceptableValueRange<float>(0f, 1f)));
+			_secondaryNullifyDuration = Bind("3b. Character Secondary", "Nullify Duration", 10f, StaticDeclareConfigDescription("The duration that Nullify lasts for on enemies when hit with Bind.", MinOnlyF(0)));
+			_secondaryNullifyBoss = Bind("3b. Character Secondary", "Nullify Duration (Bosses)", 5f, StaticDeclareConfigDescription("The duration that Nullify lasts for on bosses hit with Bind. Set to 0 to prevent it entirely.", MinOnlyF(0)));
 
 			_utilitySpeed = Bind("3c. Character Utility", "Dive Speed", 4f, StaticDeclareConfigDescription("The speed at which Dive moves you, as a multiplied factor of your current movement speed.", MinOnlyF()));
 			_utilityRegeneration = Bind("3c. Character Utility", "Dive Health Regeneration", 0.1f, StaticDeclareConfigDescription("The amount of health that dive regenerates, as a percentage.", new AcceptableValueRange<float>(0f, 1f)));

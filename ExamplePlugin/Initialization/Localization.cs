@@ -16,6 +16,7 @@ namespace VoidJailerMod
 		public const string SURVIVOR_LORE = $"{UNIQUE_SURVIVOR_PREFIX}_LORE";
 		public const string SURVIVOR_OUTRO = $"{UNIQUE_SURVIVOR_PREFIX}_OUTRO_FLAVOR";
 		public const string SURVIVOR_OUTRO_FAILED = $"{UNIQUE_SURVIVOR_PREFIX}_OUTRO_FLAVOR_FAIL"; // As far as this one goes, I am not actually sure if it gets used. I'll add it anyway.
+		public const string SURVIVOR_UMBRA = $"{UNIQUE_SURVIVOR_PREFIX}_UMBRA";
 
 		public const string DEFAULT_SKIN = $"{UNIQUE_SURVIVOR_PREFIX}_DEFAULT_SKIN";
 		public const string GHOST_SKIN = $"{UNIQUE_SURVIVOR_PREFIX}_GHOST_SKIN";
@@ -104,8 +105,8 @@ namespace VoidJailerMod
 			#region Name and Lore
 			Bind(SURVIVOR_NAME, "Void Jailer");
 			Bind(SURVIVOR_DESC, LinesToSurvivorDetails(
-				"The Void Jailer specializes in short range, one-on-one combat. It has an exceptionally high burst damage output, but struggles with attack speed, making it vulnerable to swarms of enemies.\n\n<style=cIsHealing>Player Advice: You may be interested in opening \"Mod Options\" in your settings. You can configure the Jailer's camera settings here, since large characters (like this one) can often get in the way of things like combat.</style>",
-				"<style=cIsVoid>Spike</style> is a shotgun-like ability that can deal devastating blows to larger targets. It does extra damage against rooted enemies, so consider picking up a <style=cIsVoid>Tentabauble</style> if you find one.",
+				"The Void Jailer specializes in short to medium range one-on-one combat. It has an exceptionally high burst damage output, but struggles with attack speed, making it vulnerable to swarms of enemies.",
+				"<style=cIsVoid>Spike</style> is a shotgun-like ability that can deal devastating blows to larger targets. It does a significant amount of extra damage against rooted enemies, so consider picking up a <style=cIsVoid>Tentabauble</style> if you find one, and make good use of your secondary!",
 				"<style=cIsVoid>Bind</style> roots and damages a single target, pulling them directly in front of you.",
 				"<style=cIsVoid>Dive</style> is a powerful escape tool. Alongside healing you, it makes enemies lose track of you, and protects you from incoming damage.",
 				"<style=cIsVoid>Fury</style> gives you armor and increases your damage output. It is useful against bosses. Be careful though, you aren't invincible, and reckless use can get you killed!"
@@ -113,11 +114,12 @@ namespace VoidJailerMod
 			Bind(SURVIVOR_LORE, THE_LORE);
 			Bind(SURVIVOR_OUTRO, "..and so it left, intrigued to become what it once sought to capture");
 			Bind(SURVIVOR_OUTRO_FAILED, "..and so it was detained, awaiting its sentence at the end of Time");
+			Bind(SURVIVOR_UMBRA, "Rogue Warden");
 			#endregion
 
 			#region Palettes
 			Bind(DEFAULT_SKIN, "Default");
-			Bind(GHOST_SKIN, "Friendly");
+			Bind(GHOST_SKIN, "Newly Hatched Zoea");
 			#endregion
 
 			#region Passive
@@ -134,7 +136,7 @@ namespace VoidJailerMod
 
 			#region Primary
 			Bind(SKILL_PRIMARY_SHOTGUN_NAME, "Spike");
-			Bind(SKILL_PRIMARY_SHOTGUN_DESC, $"Fire a burst of spikes from your claw, dealing <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.BasePrimaryDamage)}</style> damage</style>, plus an additional <style=cIsDamage>75% damage</style> on targets that are <style=cIsVoid>Nullified</style> or <style=cIsVoid>Tethered</style>.");
+			Bind(SKILL_PRIMARY_SHOTGUN_DESC, $"Fire a burst of spikes from your claw, dealing <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.BasePrimaryDamage)}</style> damage</style>. Damage is boosted by <style=cIsDamage>{Percentage(Configuration.NullifiedDamageBoost)}</style> on targets that are <style=cIsVoid>Nullified</style> or <style=cIsVoid>Tethered</style>.");
 
 			Bind(SKILL_PRIMARY_MINIGUN_NAME, "Perforate");
 			Bind(SKILL_PRIMARY_MINIGUN_DESC, $"The firerate of your claw has increased dramatically, but less spikes are shot per burst.");
@@ -150,9 +152,8 @@ namespace VoidJailerMod
 			Bind(SKILL_UTILITY_DESC, $"Propel yourself through the void at <style=cUserSetting>{Percentage(Configuration.UtilitySpeed)} movement speed</style> for <style=cUserSetting>{RoundTen(Configuration.UtilityDuration)} {LazyPluralize("second", Configuration.UtilityDuration)}</style>, healing <style=cIsHealing>{Percentage(Configuration.UtilityRegeneration)} maximum health</style>. Gain <style=cIsUtility>Immunity</style> and <style=cIsUtility>Invisibility</style> while away.");
 			#endregion
 
-			//string commonSpecialStatDesc = $"Gain <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.SpecialArmorBoost)}</style> Armor</style>. <style=cIsVoid>Spike</style> projectiles cause <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
 			string commonSpecialStatDesc = $"Gain <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.SpecialArmorBoost)}</style> Armor</style> and replace <style=cIsVoid>Spike</style> with <style=cIsVoid>Perforate</style>.";
-			string perforateDesc = $"<style=cIsUtility>Fully automatic.</style> Fire projectiles much more frequently, but with less projectiles per burst. Attacks inflict <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Mathf.CeilToInt(Configuration.BasePrimaryProjectileCount * SpikeMinigunSkill.BASE_BULLETS_PER_BURST_AS_FRAC)}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
+			string perforateDesc = $"<style=cIsUtility>Fully automatic. Agile.</style> Fire projectiles much more frequently, but with less projectiles per burst. Attacks inflict <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Mathf.CeilToInt(Configuration.BasePrimaryProjectileCount * SpikeMinigunSkill.BASE_BULLETS_PER_BURST_AS_FRAC)}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
 
 			#region Special
 			Bind(SKILL_SPECIAL_NAME, "Fury of the Warden");
