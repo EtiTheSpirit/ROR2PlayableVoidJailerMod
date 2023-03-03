@@ -27,6 +27,10 @@ namespace VoidJailerMod.Skills.Spawn {
 			}
 		}
 
+		public override InterruptPriority GetMinimumInterruptPriority() {
+			return InterruptPriority.Death;
+		}
+
 		public static string spawnFXTransformName => EntityStates.VoidJailer.SpawnState.spawnFXTransformName;
 	}
 }

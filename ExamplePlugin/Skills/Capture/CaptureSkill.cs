@@ -51,7 +51,7 @@ namespace VoidJailerMod.Skills.Capture {
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
-			return InterruptPriority.PrioritySkill;
+			return InterruptPriority.Frozen;
 		}
 
 		public static string AnimationLayerName => EntityStates.VoidJailer.Weapon.ChargeCapture.animationLayerName;

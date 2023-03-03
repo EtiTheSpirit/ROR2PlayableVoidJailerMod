@@ -1,5 +1,16 @@
-## 1.2.1
+## 1.2.2
 <details open>
+<summary><strong>haha spike no longer go GGFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFHKHHHHKHHKHHHHKHKHKKCHKKKHHHKKHKHHJHKHVCJHJHHHJCKHHKCHHKKK :DDD</strong></summary>
+<br/>
+<ul>
+<li>Perforate (special) no longer gets "stuck" for a second or so when activating it whilst firing Spike or Bind; it now interrupts those abilities and activates immediately. No more wasted shots due to an annoying delay.</li>
+<li>Fixed an issue where Spike could interrupt itself, spamming the charge-up sound when holding the primary fire button (it now only gets interrupted when frozen or killed, or by a priority skill).</li>
+<li>Fixed an issue where Perforate could interrupt itself, firing darts every frame instead of at the appropriate interval (it now only gets interrupted when frozen or killed).</li>
+<li>Fixed an issue where Bind could be interrupted in the middle of its sequence by the player (it now only gets interrupted when frozen or killed).</li>
+</details>
+
+## 1.2.1
+<details>
 <summary><strong>A minor tweak while I proceed to do everything <em>except</em> work on this mod. I'm working on other stuff. Sorry.</strong></summary>
 <br/>
 <ul>

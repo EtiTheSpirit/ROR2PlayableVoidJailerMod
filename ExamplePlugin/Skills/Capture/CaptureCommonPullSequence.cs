@@ -96,7 +96,7 @@ namespace VoidJailerMod.Skills.Capture {
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
-			return InterruptPriority.PrioritySkill;
+			return InterruptPriority.Frozen;
 		}
 
 		public string AnimationLayerName { get; } = "Gesture, Additive";

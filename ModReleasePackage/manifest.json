@@ -1,6 +1,6 @@
 ﻿{
 	"name": "VoidJailerPlayerCharacter",
-	"version_number": "1.2.1",
+	"version_number": "1.2.2",
 	"website_url": "https://github.com/EtiTheSpirit/ROR2PlayableVoidJailerMod",
 	"description": "This is a public test build, some features are missing (i.e. icons)! Allows the player to play as a Void Jailer. Go feed a bottom you bottom feeder.",
 	"dependencies": [

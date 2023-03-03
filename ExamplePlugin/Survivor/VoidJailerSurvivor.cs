@@ -181,7 +181,7 @@ namespace VoidJailerMod.Survivor {
 			perforate.activationState = UtilCreateSerializableAndNetRegister<SpikeMinigunSkill>();
 			perforate.activationStateMachineName = "Weapon";
 			perforate.baseMaxStock = 1;
-			perforate.baseRechargeInterval = 0.5f;
+			perforate.baseRechargeInterval = 0f;
 			perforate.beginSkillCooldownOnSkillEnd = false;
 			perforate.canceledFromSprinting = false;
 			perforate.cancelSprintingOnActivation = false;

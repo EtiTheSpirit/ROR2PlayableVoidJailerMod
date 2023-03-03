@@ -104,10 +104,7 @@ namespace VoidJailerMod.Skills.Spike {
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
-			if (fixedAge <= priorityReductionDuration) {
-				return InterruptPriority.PrioritySkill;
-			}
-			return InterruptPriority.Skill;
+			return InterruptPriority.Frozen;
 		}
 
 		// private new GameObject projectilePrefab => HasBuff(BuffProvider.Fury) ? ProjectileProvider.ExplosiveSpikeDart : ProjectileProvider.SpikeDart;

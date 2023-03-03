@@ -58,7 +58,7 @@ namespace VoidJailerMod.Skills.Spike {
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
-			return InterruptPriority.Skill;
+			return InterruptPriority.PrioritySkill;
 		}
 
 		public static string SpikeAttackSoundEffect => EntityStates.VoidJailer.Weapon.ChargeFire.attackSoundEffect;

@@ -154,7 +154,7 @@ namespace VoidJailerMod.Skills.Spike {
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
-			return InterruptPriority.PrioritySkill;
+			return InterruptPriority.Frozen;
 		}
 
 		public static string FireAnimationLayerName => EntityStates.VoidJailer.Weapon.Fire.animationLayerName;
