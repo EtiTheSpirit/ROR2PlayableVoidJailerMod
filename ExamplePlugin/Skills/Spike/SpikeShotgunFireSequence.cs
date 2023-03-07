@@ -25,7 +25,7 @@ namespace VoidJailerMod.Skills.Spike {
 			minSpread = 0;
 			maxSpread = 3;
 			recoilAmplitude = 1;
-			force = 700f;
+			force = 400f;
 			duration = 1f;
 		}
 

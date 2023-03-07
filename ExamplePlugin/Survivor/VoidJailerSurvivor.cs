@@ -7,6 +7,7 @@ using RoR2.Skills;
 using ROR2HPBarAPI.API;
 using System;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
@@ -64,6 +65,10 @@ namespace VoidJailerMod.Survivor {
 			Log.LogTrace("Initializing Survivor info!");
 
 			playerBodyPrefab = ROR2ObjectCreator.CreateBody("VoidJailerSurvivor", "RoR2/DLC1/VoidJailer/VoidJailerBody.prefab");
+
+			GameObject orgJailer = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidJailer/VoidJailerBody.prefab").WaitForCompletion();
+			SerializableEntityStateType defaultJailerBindStateType = orgJailer.GetComponent<SkillLocator>().secondary.skillDef.activationState;
+			GameObject.DestroyImmediate(orgJailer);
 
 			Log.LogTrace("Setting localPlayerAuthority=true on Jailer Body (this patches a bug)...");
 			NetworkIdentity netID = playerBodyPrefab.GetComponent<NetworkIdentity>();
@@ -209,7 +214,7 @@ namespace VoidJailerMod.Survivor {
 			bind.activationState = UtilCreateSerializableAndNetRegister<CaptureSkill>();
 			bind.activationStateMachineName = "Weapon";
 			bind.baseMaxStock = 1;
-			bind.baseRechargeInterval = 8;
+			bind.baseRechargeInterval = 6;
 			bind.beginSkillCooldownOnSkillEnd = true;
 			bind.canceledFromSprinting = false;
 			bind.cancelSprintingOnActivation = true;
@@ -227,11 +232,36 @@ namespace VoidJailerMod.Survivor {
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bind, "secondary", 0);
 
-			Log.LogTrace($"Registering intermediary states {nameof(SpikeShotgunFireSequence)} and {nameof(ExitCapture)}");
+			Log.LogTrace($"Registering intermediary states {nameof(CaptureCommonPullSequence)} and {nameof(ExitCapture)}");
 			ContentAddition.AddEntityState<CaptureCommonPullSequence>(out _);
 			ContentAddition.AddEntityState<ExitCapture>(out _);
 
 			Log.LogTrace("Finished registering Bind.");
+
+			SkillDef bindAlt = ScriptableObject.CreateInstance<SkillDef>();//SurvivorCatalog.FindSurvivorDef("VoidJailer").bodyPrefab.GetComponent<SkillLocator>().secondary.skillDef;
+			bindAlt.activationState = defaultJailerBindStateType;
+			bindAlt.activationStateMachineName = "Weapon";
+			bindAlt.baseMaxStock = 1;
+			bindAlt.baseRechargeInterval = 6;
+			bindAlt.beginSkillCooldownOnSkillEnd = true;
+			bindAlt.canceledFromSprinting = false;
+			bindAlt.cancelSprintingOnActivation = true;
+			bindAlt.dontAllowPastMaxStocks = true;
+			bindAlt.forceSprintDuringState = false;
+			bindAlt.fullRestockOnAssign = true;
+			bindAlt.interruptPriority = InterruptPriority.Skill;
+			bindAlt.isCombatSkill = true;
+			bindAlt.mustKeyPress = true;
+			bindAlt.rechargeStock = bind.baseMaxStock;
+			bindAlt.requiredStock = 1;
+			bindAlt.stockToConsume = 1;
+			bindAlt.skillNameToken = Localization.SKILL_SECONDARY_NAME;
+			bindAlt.skillDescriptionToken = Localization.SKILL_SECONDARY_DESC;
+			// icon
+			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bindAlt, "secondary", 1);
+
+
+			Log.LogTrace("Finished registering Bind (Default Variant).");
 			#endregion
 
 			#region Utility
