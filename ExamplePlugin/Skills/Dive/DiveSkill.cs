@@ -46,11 +46,14 @@ namespace VoidJailerMod.Skills.Dive {
 			if (inputBank.skill2.down) {
 				skillLocator.secondary.stock++;
 			}
-
-			EffectManager.SpawnEffect(GenericCharacterDeath.voidDeathEffect, new EffectData {
-				origin = characterBody.corePosition,
-				scale = characterBody.bestFitRadius
-			}, false);
+			if (!isAuthority || (isAuthority && !VoidJailerPlayerPlugin.IsVR)) {
+				// If it's a remote player OR if it's the local player and the local player is not in VR, spawn the effect
+				// Otherwise skip it because its blinding.
+				EffectManager.SpawnEffect(GenericCharacterDeath.voidDeathEffect, new EffectData {
+					origin = characterBody.corePosition,
+					scale = characterBody.bestFitRadius
+				}, false);
+			}
 			Util.PlayAttackSpeedSound(BlinkState.beginSoundString, gameObject, 0.6f);
 			Util.PlayAttackSpeedSound(BlinkState.beginSoundString, gameObject, 0.7f);
 			base.OnEnter();
@@ -88,10 +91,14 @@ namespace VoidJailerMod.Skills.Dive {
 		}
 
 		public override void OnExit() {
-			EffectManager.SpawnEffect(GenericCharacterDeath.voidDeathEffect, new EffectData {
-				origin = characterBody.corePosition,
-				scale = characterBody.bestFitRadius
-			}, false);
+			if (!isAuthority || (isAuthority && !VoidJailerPlayerPlugin.IsVR)) {
+				// If it's a remote player OR if it's the local player and the local player is not in VR, spawn the effect
+				// Otherwise skip it because its blinding.
+				EffectManager.SpawnEffect(GenericCharacterDeath.voidDeathEffect, new EffectData {
+					origin = characterBody.corePosition,
+					scale = characterBody.bestFitRadius
+				}, false);
+			}
 			Util.PlayAttackSpeedSound(BlinkState.endSoundString, gameObject, 1f);
 			if (_characterModel != null) {
 				_characterModel.invisibilityCount--;

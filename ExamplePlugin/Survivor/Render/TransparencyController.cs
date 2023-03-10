@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using VoidJailerMod.XansTools;
+using VRAPI;
 
 namespace VoidJailerMod.Survivor.Render {
 	public class TransparencyController : MonoBehaviour {
@@ -16,6 +17,8 @@ namespace VoidJailerMod.Survivor.Render {
 			renderers = GetComponentsInChildren<Renderer>();
 			propertyStorage = new MaterialPropertyBlock();
 			SceneCamera.onSceneCameraPreRender += OnSceneCameraPreRender;
+
+			if (VR.enabled && MotionControls.enabled) Log.LogTrace("VR is enabled. Transparency will be forcefully set to full opacity because you cannot see your character in the first place.");
 		}
 
 		void OnDestroy() {
@@ -59,10 +62,14 @@ namespace VoidJailerMod.Survivor.Render {
 			if (!isMine) return;
 			if (DestroyIfNeeded()) return;
 
-			if (body.outOfDanger && body.outOfCombat) {
-				SetTransparency(Configuration.LocalTransparencyOutOfCombat / 100f);
+			if (VR.enabled && MotionControls.enabled) {
+				SetTransparency(0);
 			} else {
-				SetTransparency(Configuration.LocalTransparencyInCombat / 100f);
+				if (body.outOfDanger && body.outOfCombat) {
+					SetTransparency(Configuration.LocalTransparencyOutOfCombat / 100f);
+				} else {
+					SetTransparency(Configuration.LocalTransparencyInCombat / 100f);
+				}
 			}
 		}
 

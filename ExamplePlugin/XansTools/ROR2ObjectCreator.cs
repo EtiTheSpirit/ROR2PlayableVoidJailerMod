@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using VoidJailerMod.XansTools.ROR2VoidReaverModFixed.XanCode.Data;
+using VRAPI;
 
 namespace VoidJailerMod.XansTools {
 	internal static class ROR2ObjectCreator {
@@ -231,13 +232,15 @@ namespace VoidJailerMod.XansTools {
 				MinionSkinReplacements = Ext.NewEmpty<SkinDef.MinionSkinReplacement>()
 			};
 
-			Log.LogTrace("Disabling transparency dithering...");
-			mtl0.SetFloat("_DitherOn", 0);
-			mtl1.SetFloat("_DitherOn", 0);
-			mtl2.SetFloat("_DitherOn", 0);
-			mtl0.DisableKeyword("DITHER");
-			mtl1.DisableKeyword("DITHER");
-			mtl2.DisableKeyword("DITHER");
+			if (!VR.enabled || !MotionControls.enabled) {
+				Log.LogTrace("Disabling transparency dithering...");
+				mtl0.SetFloat("_DitherOn", 0);
+				mtl1.SetFloat("_DitherOn", 0);
+				mtl2.SetFloat("_DitherOn", 0);
+				mtl0.DisableKeyword("DITHER");
+				mtl1.DisableKeyword("DITHER");
+				mtl2.DisableKeyword("DITHER");
+			}
 
 			// lmfao
 			// if one of you knows how to actually store + address the materials for this let me know
@@ -290,13 +293,15 @@ namespace VoidJailerMod.XansTools {
 			};
 
 
-			Log.LogTrace("Disabling transparency dithering...");
-			mtl0.SetFloat("_DitherOn", 0);
-			mtl1.SetFloat("_DitherOn", 0);
-			mtl2.SetFloat("_DitherOn", 0);
-			mtl0.DisableKeyword("DITHER");
-			mtl1.DisableKeyword("DITHER");
-			mtl2.DisableKeyword("DITHER");
+			if (!VR.enabled || !MotionControls.enabled) {
+				Log.LogTrace("Disabling transparency dithering...");
+				mtl0.SetFloat("_DitherOn", 0);
+				mtl1.SetFloat("_DitherOn", 0);
+				mtl2.SetFloat("_DitherOn", 0);
+				mtl0.DisableKeyword("DITHER");
+				mtl1.DisableKeyword("DITHER");
+				mtl2.DisableKeyword("DITHER");
+			}
 
 			Log.LogTrace("Adding skin controller, if necessary...");
 			ModelSkinController ctrl = effectiveRoot.GetOrCreateComponent<ModelSkinController>(out bool justCreatedController);

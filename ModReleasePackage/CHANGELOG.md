@@ -1,5 +1,16 @@
-## 1.2.2
+## 1.3.0
 <details open>
+<summary><strong>"please dont delete me with the void i have phantom sense" haha jailer go BFMMMVMMVM</strong></summary>
+<br/>
+<ul>
+<li>Added experimental VR support through VRAPI. A few UX issues here and there but they are mostly ironed out.</li>
+<li>Added a new configuration option to do further aim compensation whilst in VR. It feels better to play with this on, but it <em>technically</em> gives you a slight advantage (albeit minimal). Configure at your own discretion.</li>
+<li>The wind-down state of Bind (after grabbing something) can be interrupted by standard skills now, making combos a little faster to pull off.</li>
+<li>Fixed a bug causing the lasso effect spawned by Bind to originate from your torso instead of from the muzzle of the arm.</li>
+</details>
+
+## 1.2.2
+<details>
 <summary><strong>haha spike no longer go GGFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFHKHHHHKHHKHHHHKHKHKKCHKKKHHHKKHKHHJHKHVCJHJHHHJCKHHKCHHKKK :DDD</strong></summary>
 <br/>
 <ul>

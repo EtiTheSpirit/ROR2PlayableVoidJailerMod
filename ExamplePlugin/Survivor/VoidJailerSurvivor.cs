@@ -19,6 +19,7 @@ using VoidJailerMod.Skills.Spike;
 using VoidJailerMod.Survivor.Interop;
 using VoidJailerMod.Survivor.Render;
 using VoidJailerMod.XansTools;
+using VRAPI;
 using CharacterBody = RoR2.CharacterBody;
 using Interactor = RoR2.Interactor;
 
@@ -65,10 +66,6 @@ namespace VoidJailerMod.Survivor {
 			Log.LogTrace("Initializing Survivor info!");
 
 			playerBodyPrefab = ROR2ObjectCreator.CreateBody("VoidJailerSurvivor", "RoR2/DLC1/VoidJailer/VoidJailerBody.prefab");
-
-			GameObject orgJailer = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidJailer/VoidJailerBody.prefab").WaitForCompletion();
-			SerializableEntityStateType defaultJailerBindStateType = orgJailer.GetComponent<SkillLocator>().secondary.skillDef.activationState;
-			GameObject.DestroyImmediate(orgJailer);
 
 			Log.LogTrace("Setting localPlayerAuthority=true on Jailer Body (this patches a bug)...");
 			NetworkIdentity netID = playerBodyPrefab.GetComponent<NetworkIdentity>();
@@ -238,8 +235,9 @@ namespace VoidJailerMod.Survivor {
 
 			Log.LogTrace("Finished registering Bind.");
 
+			/*
 			SkillDef bindAlt = ScriptableObject.CreateInstance<SkillDef>();//SurvivorCatalog.FindSurvivorDef("VoidJailer").bodyPrefab.GetComponent<SkillLocator>().secondary.skillDef;
-			bindAlt.activationState = defaultJailerBindStateType;
+			bindAlt.activationState = new SerializableEntityStateType(typeof(EntityStates.VoidJailer.Capture));
 			bindAlt.activationStateMachineName = "Weapon";
 			bindAlt.baseMaxStock = 1;
 			bindAlt.baseRechargeInterval = 6;
@@ -260,8 +258,8 @@ namespace VoidJailerMod.Survivor {
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bindAlt, "secondary", 1);
 
-
 			Log.LogTrace("Finished registering Bind (Default Variant).");
+			*/
 			#endregion
 
 			#region Utility
@@ -287,6 +285,7 @@ namespace VoidJailerMod.Survivor {
 			dive.skillDescriptionToken = Localization.SKILL_UTILITY_DESC;
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, dive, "utility", 0);
+			VR.AddVignetteState(typeof(DiveSkill));
 			Log.LogTrace("Finished registering Dive.");
 			#endregion
 
@@ -406,7 +405,9 @@ namespace VoidJailerMod.Survivor {
 		private static void OnRebuildMannequinInstance(On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.orig_RebuildMannequinInstance originalMethod, RoR2.SurvivorMannequins.SurvivorMannequinSlotController @this) {
 			originalMethod(@this);
 			if (@this.mannequinInstanceTransform != null && @this.currentSurvivorDef == Jailer) {
-				ROR2ObjectCreator.GloballySetJailerSkinTransparency(false);
+				if (!VR.enabled || !MotionControls.enabled) {
+					ROR2ObjectCreator.GloballySetJailerSkinTransparency(false);
+				}
 			}
 		}
 
@@ -418,7 +419,9 @@ namespace VoidJailerMod.Survivor {
 		private static void OnCharacterBodyAwake(On.RoR2.CharacterBody.orig_Awake originalMethod, CharacterBody @this) {
 			originalMethod(@this);
 			if (@this.baseNameToken == Localization.SURVIVOR_NAME) {
-				ROR2ObjectCreator.GloballySetJailerSkinTransparency(true);
+				if (!VR.enabled || !MotionControls.enabled) {
+					ROR2ObjectCreator.GloballySetJailerSkinTransparency(true);
+				}
 				CameraTargetParams tParams = @this.GetComponent<CameraTargetParams>();
 				if (tParams) {
 					tParams.cameraParams.data.idealLocalCameraPos = Configuration.CameraOffset / (Configuration.UseFullSizeCharacter ? 1 : 2);

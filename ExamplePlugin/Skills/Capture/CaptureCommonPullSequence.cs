@@ -8,9 +8,19 @@ using RoR2;
 using System.Linq;
 using VoidJailerMod.Skills.Spike;
 using UnityEngine.AddressableAssets;
+using VRAPI;
 
 namespace VoidJailerMod.Skills.Capture {
 	public class CaptureCommonPullSequence : BaseState {
+
+		public new Ray GetAimRay() {
+			if (VoidJailerPlayerPlugin.IsVR) {
+				return MotionControls.nonDominantHand.aimRay;
+			} else {
+				return base.GetAimRay();
+			}
+		}
+
 		public override void OnEnter() {
 			base.OnEnter();
 			Duration = BaseDuration / attackSpeedStat;
@@ -72,9 +82,10 @@ namespace VoidJailerMod.Skills.Capture {
 					characterBody.healthComponent.Heal(Configuration.SecondaryHealAmountOnHit * characterBody.maxHealth, default);
 					if (PullTracerPrefab) {
 						Vector3 position = targetHurtBox.transform.position;
-						Vector3 start = characterBody.corePosition;
-						Transform transform = FindModelChild(MuzzleString);
-						if (transform) {
+						Vector3 start = aimRay.origin;
+						Transform transform =  FindModelChild(MuzzleString);
+						if (transform && !VoidJailerPlayerPlugin.IsVR) {
+							// In VR, the hand aim ray is the muzzle, so just keep the existing value.
 							start = transform.position;
 						}
 						EffectData effectData = new EffectData {
@@ -109,7 +120,7 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public string EnterSoundString { get; } = "Play_voidJailer_m2_shoot";
 
-		public float PullFieldOfView { get; } = 17.5f;
+		public float PullFieldOfView => (VoidJailerPlayerPlugin.IsVR && Configuration.VRExtendedAimCompensation) ? 22.5f : 17.5f;
 
 		public float PullMinDistance { get; } = 1f;
 

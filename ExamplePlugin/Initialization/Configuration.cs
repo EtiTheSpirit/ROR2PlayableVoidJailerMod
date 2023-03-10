@@ -168,6 +168,8 @@ namespace VoidJailerMod {
 
 		public static float LocalTransparencyOutOfCombat => _transparencyOutOfCombat.Value;
 
+		public static bool VRExtendedAimCompensation => _vrAimCompensation.Value;
+
 		#endregion
 
 		#endregion
@@ -241,6 +243,7 @@ namespace VoidJailerMod {
 		private static ConfigEntry<bool> _useFullSizeCharacter;
 		private static ConfigEntry<bool> _voidImmunity;
 		private static ConfigEntry<bool> _traceLogging;
+		private static ConfigEntry<bool> _vrAimCompensation;
 		#endregion
 
 		#region Camera
@@ -403,6 +406,7 @@ namespace VoidJailerMod {
 
 			_useFullSizeCharacter = Bind("5. Character Specifics", "Use Full Size Jailer", false, "This MUST be synchronized between players in multiplayer, or people will sink into the floor / float! By default, the mod sets the Jailer's scale to 50% that of its natural size. Turning this on will make you the same size as a normal Jailer. **WARNING** This setting is known to cause collision issues. Some areas are impossible to reach.");
 			_voidImmunity = Bind("5. Character Specifics", "Void Immunity", true, "If enabled, the player will be immune to damage from a void atmosphere and will not have the fog effect applied to them. **WARNING** There isn't actually a way to tell if you are taking damage from the void. The way I do it is an educated guess. This means you may actually resist completely valid damage types from some enemies, but I have yet to properly test this.");
+			_vrAimCompensation = Bind("5. Character Specifics", "VR Aim Compensation", true, "When enabled, the cone used for auto-aim of the Spike/Perforate and Bind abilities is marginally expanded to compensate for the much larger and inherently less precise VR environment. Disabling this mimics desktop mode stats, but it often feels difficult and inconsistent to hit targets.");
 
 			RiskOfOptions.ModSettingsManager.AddOption(new CheckBoxOption(_useFullSizeCharacter, new CheckBoxConfig {
 				name = "Use Full Size Character",

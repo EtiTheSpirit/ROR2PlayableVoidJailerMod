@@ -10,9 +10,18 @@ using UnityEngine;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
+using VRAPI;
 
 namespace VoidJailerMod.Skills.Spike {
 	public class SpikeMinigunSkill : GenericProjectileBaseState {
+
+		public new Ray GetAimRay() {
+			if (VoidJailerPlayerPlugin.IsVR) {
+				return MotionControls.dominantHand.aimRay;
+			} else {
+				return base.GetAimRay();
+			}
+		}
 
 		public SpikeMinigunSkill() {
 			// projectilePrefab = ProjectileProvider.SpikeDart;
@@ -37,7 +46,7 @@ namespace VoidJailerMod.Skills.Spike {
 				if (Configuration.HomingPrimaryProjectiles) {
 					BullseyeSearch bullseyeSearch = new BullseyeSearch {
 						teamMaskFilter = TeamMask.allButNeutral,
-						maxAngleFilter = 2.5f,
+						maxAngleFilter = SpikeShotgunFireSequence.GetMaxShotgunAdjustmentAngle(),
 						minDistanceFilter = 0f,
 						maxDistanceFilter = ProjectileProvider.SpikeMaxDistance,
 						searchOrigin = aimRay.origin,
