@@ -1,5 +1,22 @@
-## 1.3.0
+## 1.3.2
 <details open>
+<summary><strong>About time!</strong></summary>
+<br/>
+<ul>
+<li>Added icons for the abilities and rage buff.</li>
+</details>
+
+## 1.3.1
+<details>
+<summary><strong>Thank you C#, Very Cool!</strong></summary>
+<br/>
+<ul>
+<li>Reorganized the code, fixing a bug that caused the mod to accidentally depend on the entire VR Mod instead of the VR API.</li>
+<li>Fixed a bug allowing Perforate to be spammed if you clicked quickly instead of holding it down (sorry autoclicker users, no more free DPS).</li>
+</details>
+
+## 1.3.0
+<details>
 <summary><strong>"please dont delete me with the void i have phantom sense" haha jailer go BFMMMVMMVM</strong></summary>
 <br/>
 <ul>

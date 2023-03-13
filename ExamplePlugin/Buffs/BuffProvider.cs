@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using VoidJailerMod.Buffs.Interop;
+using VoidJailerMod.Initialization.Sprites;
 
 namespace VoidJailerMod.Buffs {
 	public static class BuffProvider {
@@ -20,6 +21,7 @@ namespace VoidJailerMod.Buffs {
 			Fury.isDebuff = false;
 			Fury.buffColor = new Color32(255, 127, 127, 255);
 			Fury.canStack = false;
+			Fury.iconSprite = Images.WardensFuryBuffIcon;
 			ContentAddition.AddBuffDef(Fury);
 
 			On.RoR2.CharacterBody.RecalculateStats += OnRecalculateStats;

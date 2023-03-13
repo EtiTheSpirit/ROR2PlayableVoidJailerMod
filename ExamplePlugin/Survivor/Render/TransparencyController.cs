@@ -18,7 +18,7 @@ namespace VoidJailerMod.Survivor.Render {
 			propertyStorage = new MaterialPropertyBlock();
 			SceneCamera.onSceneCameraPreRender += OnSceneCameraPreRender;
 
-			if (VR.enabled && MotionControls.enabled) Log.LogTrace("VR is enabled. Transparency will be forcefully set to full opacity because you cannot see your character in the first place.");
+			if (VRInterop.VRAvailable) Log.LogTrace("VR is enabled. Transparency will be forcefully set to full opacity because you cannot see your character in the first place.");
 		}
 
 		void OnDestroy() {
@@ -62,7 +62,7 @@ namespace VoidJailerMod.Survivor.Render {
 			if (!isMine) return;
 			if (DestroyIfNeeded()) return;
 
-			if (VR.enabled && MotionControls.enabled) {
+			if (VRInterop.VRAvailable) {
 				SetTransparency(0);
 			} else {
 				if (body.outOfDanger && body.outOfCombat) {

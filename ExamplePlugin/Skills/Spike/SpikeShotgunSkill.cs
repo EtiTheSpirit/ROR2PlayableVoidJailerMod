@@ -5,18 +5,12 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using VoidJailerMod.Damage;
-using VRAPI;
+using VoidJailerMod.XansTools;
 
 namespace VoidJailerMod.Skills.Spike {
-	public class SpikeShotgunSkill : BaseState {
+	public class SpikeShotgunSkill : BaseState, VRInterop.IAimRayProvider {
 
-		public new Ray GetAimRay() {
-			if (VoidJailerPlayerPlugin.IsVR) {
-				return MotionControls.dominantHand.aimRay;
-			} else {
-				return base.GetAimRay();
-			}
-		}
+		public Ray PublicAimRay => GetAimRay();
 
 		public override void OnEnter() {
 			base.OnEnter();
@@ -45,7 +39,7 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void Update() {
 			base.Update();
 			if (_chargeVfxInstance) {
-				Ray aimRay = GetAimRay();
+				Ray aimRay = VRInterop.GetDominantHandRay(this);
 				_chargeVfxInstance.transform.forward = aimRay.direction;
 			}
 		}

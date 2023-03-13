@@ -4,9 +4,9 @@
 
 Balance is a bit off but any insight would be much appreciated (especially given that you can test it yourself, check the configs), you can find me in the Risk of Rain 2 Modding Discord under the nickname "Xan" `Xan // Eti#1760`.
 
+# Interested in my mods?
+I have a Discord server dedicated to my mods for all games! You can join it [here](https://discord.gg/YGJ7a44UEE).
+
 # To Do List
 * An alternative to Dive (which was copied directly from Reaver anyway).
-* Icons for all abilities
-* Variant of the Survivor icon that uses a blue outline instead of a red one
 * Survivor lore
-* Tune all default stats (they are already able to be configured to enable better experiences for modpack users, this is mostly so that it "comes out of the box" with the right numbers)

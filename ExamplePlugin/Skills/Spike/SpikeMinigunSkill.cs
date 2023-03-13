@@ -10,18 +10,12 @@ using UnityEngine;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
-using VRAPI;
+using VoidJailerMod.XansTools;
 
 namespace VoidJailerMod.Skills.Spike {
-	public class SpikeMinigunSkill : GenericProjectileBaseState {
+	public class SpikeMinigunSkill : GenericProjectileBaseState, VRInterop.IAimRayProvider {
 
-		public new Ray GetAimRay() {
-			if (VoidJailerPlayerPlugin.IsVR) {
-				return MotionControls.dominantHand.aimRay;
-			} else {
-				return base.GetAimRay();
-			}
-		}
+		public Ray PublicAimRay => GetAimRay();
 
 		public SpikeMinigunSkill() {
 			// projectilePrefab = ProjectileProvider.SpikeDart;
@@ -39,7 +33,7 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void FireProjectile() {
 			PlayAnimation(DelayBetweenShots * 3);
 			if (isAuthority) {
-				Ray aimRay = ModifyProjectileAimRay(GetAimRay());
+				Ray aimRay = ModifyProjectileAimRay(VRInterop.GetDominantHandRay(this));
 				aimRay.direction = Util.ApplySpread(aimRay.direction, minSpread, maxSpread, 1f, 1f, 0f, projectilePitchBonus);
 				GameObject target = null;
 				Vector3 newDirection = aimRay.direction;
@@ -132,7 +126,7 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void Update() {
 			base.Update();
 			if (_chargeVfxInstance) {
-				Ray aimRay = GetAimRay();
+				Ray aimRay = VRInterop.GetDominantHandRay(this);
 				_chargeVfxInstance.transform.forward = aimRay.direction;
 			}
 		}
@@ -141,6 +135,17 @@ namespace VoidJailerMod.Skills.Spike {
 			fixedAge += Time.fixedDeltaTime;
 			characterBody.SetAimTimer(3f);
 			if (isAuthority) {
+
+				if (!inputBank.skill1.down) {
+					_buttonNotPressedTimer += Time.fixedDeltaTime;
+					if (_buttonNotPressedTimer >= DelayBetweenShots) {
+						outer.SetNextStateToMain();
+						return;
+					}
+				} else {
+					_buttonNotPressedTimer = 0;
+				}
+
 				remainingTime -= Time.fixedDeltaTime;
 				if (remainingTime <= 0) {
 					remainingTime = DelayBetweenShots;
@@ -149,7 +154,7 @@ namespace VoidJailerMod.Skills.Spike {
 						FireProjectile();
 					}
 				}
-				if (!inputBank.skill1.down || !characterBody.HasBuff(BuffProvider.Fury)) {
+				if (!characterBody.HasBuff(BuffProvider.Fury)) {
 					outer.SetNextStateToMain();
 				}
 			}
@@ -191,6 +196,8 @@ namespace VoidJailerMod.Skills.Spike {
 		private GameObject _chargeVfxInstance;
 
 		private float remainingTime;
+
+		private float _buttonNotPressedTimer = 0;
 
 		public float DelayBetweenShots => INV_BASE_BULLETS_PER_ATTACK_SPEED / attackSpeedStat;
 

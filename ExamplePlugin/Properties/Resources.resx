@@ -118,6 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Bind" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bind.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Dive" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Dive.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Perforate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Perforate.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Portrait" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Portrait.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Spike" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Spike.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="texVoidExpansionIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\texVoidExpansionIcon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="voidjailerhandsbundle" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\voidjailerhandsbundle;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

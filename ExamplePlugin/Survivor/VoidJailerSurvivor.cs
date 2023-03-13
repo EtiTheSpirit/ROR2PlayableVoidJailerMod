@@ -12,6 +12,7 @@ using UnityEngine.Networking;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
+using VoidJailerMod.Initialization.Sprites;
 using VoidJailerMod.Skills.Capture;
 using VoidJailerMod.Skills.Dive;
 using VoidJailerMod.Skills.Fury;
@@ -19,7 +20,6 @@ using VoidJailerMod.Skills.Spike;
 using VoidJailerMod.Survivor.Interop;
 using VoidJailerMod.Survivor.Render;
 using VoidJailerMod.XansTools;
-using VRAPI;
 using CharacterBody = RoR2.CharacterBody;
 using Interactor = RoR2.Interactor;
 
@@ -83,6 +83,7 @@ namespace VoidJailerMod.Survivor {
 			body.bodyColor = new Color(0.867f, 0.468f, 0.776f);
 			body.baseNameToken = Localization.SURVIVOR_NAME;
 			body.subtitleNameToken = Localization.SURVIVOR_UMBRA;
+			body.portraitIcon = Images.Portrait.texture;
 
 			body.bodyFlags = CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.Void | CharacterBody.BodyFlags.ImmuneToVoidDeath;
 			// Immunity to void death is intentional. This is because it deletes the character model, which we don't want.
@@ -142,6 +143,7 @@ namespace VoidJailerMod.Survivor {
 			skillLoc.passiveSkill.keywordToken = Localization.PASSIVE_KEYWORD;
 			skillLoc.passiveSkill.skillNameToken = Localization.PASSIVE_NAME;
 			skillLoc.passiveSkill.skillDescriptionToken = Localization.PASSIVE_DESC;
+			skillLoc.passiveSkill.icon = Images.Portrait;
 			// skillLoc.passiveSkill.icon = CommonImages.Passive;
 			Log.LogTrace("Finished registering passive details...");
 			#endregion
@@ -167,6 +169,7 @@ namespace VoidJailerMod.Survivor {
 			spike.stockToConsume = 1;
 			spike.skillNameToken = Localization.SKILL_PRIMARY_SHOTGUN_NAME;
 			spike.skillDescriptionToken = Localization.SKILL_PRIMARY_SHOTGUN_DESC;
+			spike.icon = Images.SpikeIcon;
 			DefaultPrimary = spike;
 			// icon
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, spike, "primary", 0);
@@ -198,8 +201,8 @@ namespace VoidJailerMod.Survivor {
 			perforate.stockToConsume = 1;
 			perforate.skillNameToken = Localization.SKILL_PRIMARY_MINIGUN_NAME;
 			perforate.skillDescriptionToken = Localization.SKILL_PRIMARY_MINIGUN_DESC;
+			perforate.icon = Images.PerforateIcon;
 			MinigunPrimary = perforate;
-			// icon
 			ROR2ObjectCreator.AddNewHiddenSkill(playerBodyPrefab, perforate);
 			Log.LogTrace("Finished registering Perforate.");
 			
@@ -226,7 +229,7 @@ namespace VoidJailerMod.Survivor {
 			bind.stockToConsume = 1;
 			bind.skillNameToken = Localization.SKILL_SECONDARY_NAME;
 			bind.skillDescriptionToken = Localization.SKILL_SECONDARY_DESC;
-			// icon
+			bind.icon = Images.BindIcon;
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bind, "secondary", 0);
 
 			Log.LogTrace($"Registering intermediary states {nameof(CaptureCommonPullSequence)} and {nameof(ExitCapture)}");
@@ -235,31 +238,6 @@ namespace VoidJailerMod.Survivor {
 
 			Log.LogTrace("Finished registering Bind.");
 
-			/*
-			SkillDef bindAlt = ScriptableObject.CreateInstance<SkillDef>();//SurvivorCatalog.FindSurvivorDef("VoidJailer").bodyPrefab.GetComponent<SkillLocator>().secondary.skillDef;
-			bindAlt.activationState = new SerializableEntityStateType(typeof(EntityStates.VoidJailer.Capture));
-			bindAlt.activationStateMachineName = "Weapon";
-			bindAlt.baseMaxStock = 1;
-			bindAlt.baseRechargeInterval = 6;
-			bindAlt.beginSkillCooldownOnSkillEnd = true;
-			bindAlt.canceledFromSprinting = false;
-			bindAlt.cancelSprintingOnActivation = true;
-			bindAlt.dontAllowPastMaxStocks = true;
-			bindAlt.forceSprintDuringState = false;
-			bindAlt.fullRestockOnAssign = true;
-			bindAlt.interruptPriority = InterruptPriority.Skill;
-			bindAlt.isCombatSkill = true;
-			bindAlt.mustKeyPress = true;
-			bindAlt.rechargeStock = bind.baseMaxStock;
-			bindAlt.requiredStock = 1;
-			bindAlt.stockToConsume = 1;
-			bindAlt.skillNameToken = Localization.SKILL_SECONDARY_NAME;
-			bindAlt.skillDescriptionToken = Localization.SKILL_SECONDARY_DESC;
-			// icon
-			ROR2ObjectCreator.AddSkill(playerBodyPrefab, bindAlt, "secondary", 1);
-
-			Log.LogTrace("Finished registering Bind (Default Variant).");
-			*/
 			#endregion
 
 			#region Utility
@@ -283,9 +261,11 @@ namespace VoidJailerMod.Survivor {
 			dive.stockToConsume = 1;
 			dive.skillNameToken = Localization.SKILL_UTILITY_NAME;
 			dive.skillDescriptionToken = Localization.SKILL_UTILITY_DESC;
-			// icon
+			dive.icon = Images.DiveIcon;
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, dive, "utility", 0);
-			VR.AddVignetteState(typeof(DiveSkill));
+			if (VRInterop.VRAvailable) {
+				VRAPI.VR.AddVignetteState(typeof(DiveSkill));
+			}
 			Log.LogTrace("Finished registering Dive.");
 			#endregion
 
@@ -311,7 +291,7 @@ namespace VoidJailerMod.Survivor {
 			rage.skillNameToken = Localization.SKILL_SPECIAL_NAME;
 			rage.skillDescriptionToken = Localization.SKILL_SPECIAL_DESC;
 			rage.keywordTokens = new string[] { Localization.SKILL_SPECIAL_KEYWORD };
-			// icon
+			rage.icon = Images.PerforateIcon; // yes, perforate here
 			ROR2ObjectCreator.AddSkill(playerBodyPrefab, rage, "special", 0);
 			Log.LogTrace("Finished registering Fury of the Warden.");
 			#endregion
@@ -405,7 +385,7 @@ namespace VoidJailerMod.Survivor {
 		private static void OnRebuildMannequinInstance(On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.orig_RebuildMannequinInstance originalMethod, RoR2.SurvivorMannequins.SurvivorMannequinSlotController @this) {
 			originalMethod(@this);
 			if (@this.mannequinInstanceTransform != null && @this.currentSurvivorDef == Jailer) {
-				if (!VR.enabled || !MotionControls.enabled) {
+				if (!VRInterop.VRAvailable) {
 					ROR2ObjectCreator.GloballySetJailerSkinTransparency(false);
 				}
 			}
@@ -419,7 +399,7 @@ namespace VoidJailerMod.Survivor {
 		private static void OnCharacterBodyAwake(On.RoR2.CharacterBody.orig_Awake originalMethod, CharacterBody @this) {
 			originalMethod(@this);
 			if (@this.baseNameToken == Localization.SURVIVOR_NAME) {
-				if (!VR.enabled || !MotionControls.enabled) {
+				if (!VRInterop.VRAvailable) {
 					ROR2ObjectCreator.GloballySetJailerSkinTransparency(true);
 				}
 				CameraTargetParams tParams = @this.GetComponent<CameraTargetParams>();

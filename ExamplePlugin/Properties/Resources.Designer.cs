@@ -63,6 +63,66 @@ namespace VoidJailerMod.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Bind {
+            get {
+                object obj = ResourceManager.GetObject("Bind", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Dive {
+            get {
+                object obj = ResourceManager.GetObject("Dive", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Perforate {
+            get {
+                object obj = ResourceManager.GetObject("Perforate", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Portrait {
+            get {
+                object obj = ResourceManager.GetObject("Portrait", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Spike {
+            get {
+                object obj = ResourceManager.GetObject("Spike", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] texVoidExpansionIcon {
+            get {
+                object obj = ResourceManager.GetObject("texVoidExpansionIcon", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] voidjailerhandsbundle {
             get {
                 object obj = ResourceManager.GetObject("voidjailerhandsbundle", resourceCulture);

@@ -8,6 +8,7 @@ using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
 using VoidJailerMod.Survivor;
+using VoidJailerMod.XansTools;
 using VRAPI;
 
 namespace VoidJailerMod {
@@ -22,8 +23,6 @@ namespace VoidJailerMod {
 		public const string PLUGIN_AUTHOR = "Xan";
 		public const string PLUGIN_NAME = "VoidJailerPlayerCharacter";
 		public const string PLUGIN_VERSION = "1.3.0";
-
-		public static bool IsVR => VR.enabled && MotionControls.enabled;
 		
 		public void Awake() {
 			Log.Init(Logger);
@@ -39,7 +38,7 @@ namespace VoidJailerMod {
 		}
 
 		private void LoadCustomHands() {
-			if (IsVR) {
+			if (VRInterop.VRAvailable) {
 				AssetBundle jailerHands = AssetBundle.LoadFromMemory(Properties.Resources.voidjailerhandsbundle);
 				if (jailerHands) {
 					GameObject claw = jailerHands.LoadAsset<GameObject>("JailerClawHand");

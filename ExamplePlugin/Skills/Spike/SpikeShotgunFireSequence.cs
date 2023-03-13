@@ -12,25 +12,19 @@ using UnityEngine.Networking;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
-using VRAPI;
+using VoidJailerMod.XansTools;
 
 namespace VoidJailerMod.Skills.Spike {
-	public class SpikeShotgunFireSequence : GenericProjectileBaseState {
-
-		public new Ray GetAimRay() {
-			if (VoidJailerPlayerPlugin.IsVR) {
-				return MotionControls.dominantHand.aimRay;
-			} else {
-				return base.GetAimRay();
-			}
-		}
+	public class SpikeShotgunFireSequence : GenericProjectileBaseState, VRInterop.IAimRayProvider {
 
 		public static float GetMaxShotgunAdjustmentAngle() {
-			if (VoidJailerPlayerPlugin.IsVR && Configuration.VRExtendedAimCompensation) {
+			if (VRInterop.DoVRAimCompensation) {
 				return 7f;
 			}
 			return 2.5f;
 		}
+
+		public Ray PublicAimRay => GetAimRay();
 
 
 		public SpikeShotgunFireSequence() {
@@ -48,7 +42,7 @@ namespace VoidJailerMod.Skills.Spike {
 
 		public override void FireProjectile() {
 			if (isAuthority) {
-				Ray aimRay = ModifyProjectileAimRay(GetAimRay());
+				Ray aimRay = ModifyProjectileAimRay(VRInterop.GetDominantHandRay(this));
 				aimRay.direction = Util.ApplySpread(aimRay.direction, minSpread, maxSpread, 1f, 1f, 0f, projectilePitchBonus);
 				GameObject target = null;
 				Vector3 newDirection = aimRay.direction;

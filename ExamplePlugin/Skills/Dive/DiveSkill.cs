@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using UnityEngine;
 using RoR2;
 using BlinkState = EntityStates.ImpMonster.BlinkState;
+using VoidJailerMod.XansTools;
 
 namespace VoidJailerMod.Skills.Dive {
 
@@ -46,7 +47,7 @@ namespace VoidJailerMod.Skills.Dive {
 			if (inputBank.skill2.down) {
 				skillLocator.secondary.stock++;
 			}
-			if (!isAuthority || (isAuthority && !VoidJailerPlayerPlugin.IsVR)) {
+			if (VRInterop.CanShowNonVREffect(characterBody)) {
 				// If it's a remote player OR if it's the local player and the local player is not in VR, spawn the effect
 				// Otherwise skip it because its blinding.
 				EffectManager.SpawnEffect(GenericCharacterDeath.voidDeathEffect, new EffectData {
@@ -91,7 +92,7 @@ namespace VoidJailerMod.Skills.Dive {
 		}
 
 		public override void OnExit() {
-			if (!isAuthority || (isAuthority && !VoidJailerPlayerPlugin.IsVR)) {
+			if (VRInterop.CanShowNonVREffect(characterBody)) {
 				// If it's a remote player OR if it's the local player and the local player is not in VR, spawn the effect
 				// Otherwise skip it because its blinding.
 				EffectManager.SpawnEffect(GenericCharacterDeath.voidDeathEffect, new EffectData {

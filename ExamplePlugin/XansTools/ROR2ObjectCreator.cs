@@ -232,7 +232,7 @@ namespace VoidJailerMod.XansTools {
 				MinionSkinReplacements = Ext.NewEmpty<SkinDef.MinionSkinReplacement>()
 			};
 
-			if (!VR.enabled || !MotionControls.enabled) {
+			if (!VRInterop.VRAvailable) {
 				Log.LogTrace("Disabling transparency dithering...");
 				mtl0.SetFloat("_DitherOn", 0);
 				mtl1.SetFloat("_DitherOn", 0);
@@ -293,7 +293,7 @@ namespace VoidJailerMod.XansTools {
 			};
 
 
-			if (!VR.enabled || !MotionControls.enabled) {
+			if (!VRInterop.VRAvailable) {
 				Log.LogTrace("Disabling transparency dithering...");
 				mtl0.SetFloat("_DitherOn", 0);
 				mtl1.SetFloat("_DitherOn", 0);

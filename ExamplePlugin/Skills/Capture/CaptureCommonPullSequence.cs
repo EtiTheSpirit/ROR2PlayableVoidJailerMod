@@ -8,18 +8,12 @@ using RoR2;
 using System.Linq;
 using VoidJailerMod.Skills.Spike;
 using UnityEngine.AddressableAssets;
-using VRAPI;
+using VoidJailerMod.XansTools;
 
 namespace VoidJailerMod.Skills.Capture {
-	public class CaptureCommonPullSequence : BaseState {
+	public class CaptureCommonPullSequence : BaseState, VRInterop.IAimRayProvider {
 
-		public new Ray GetAimRay() {
-			if (VoidJailerPlayerPlugin.IsVR) {
-				return MotionControls.nonDominantHand.aimRay;
-			} else {
-				return base.GetAimRay();
-			}
-		}
+		public Ray PublicAimRay => GetAimRay();
 
 		public override void OnEnter() {
 			base.OnEnter();
@@ -29,7 +23,7 @@ namespace VoidJailerMod.Skills.Capture {
 			if (MuzzleflashEffectPrefab) {
 				EffectManager.SimpleMuzzleFlash(MuzzleflashEffectPrefab, gameObject, MuzzleString, false);
 			}
-			Ray aimRay = GetAimRay();
+			Ray aimRay = VRInterop.GetNonDominantHandRay(this);
 			if (NetworkServer.active) {
 				BullseyeSearch bullseyeSearch = new BullseyeSearch {
 					teamMaskFilter = TeamMask.allButNeutral,
@@ -84,7 +78,7 @@ namespace VoidJailerMod.Skills.Capture {
 						Vector3 position = targetHurtBox.transform.position;
 						Vector3 start = aimRay.origin;
 						Transform transform =  FindModelChild(MuzzleString);
-						if (transform && !VoidJailerPlayerPlugin.IsVR) {
+						if (transform && !VRInterop.VRAvailable) {
 							// In VR, the hand aim ray is the muzzle, so just keep the existing value.
 							start = transform.position;
 						}
@@ -120,7 +114,7 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public string EnterSoundString { get; } = "Play_voidJailer_m2_shoot";
 
-		public float PullFieldOfView => (VoidJailerPlayerPlugin.IsVR && Configuration.VRExtendedAimCompensation) ? 22.5f : 17.5f;
+		public float PullFieldOfView => VRInterop.DoVRAimCompensation ? 22.5f : 17.5f;
 
 		public float PullMinDistance { get; } = 1f;
 
