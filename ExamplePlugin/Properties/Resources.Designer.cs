@@ -83,6 +83,16 @@ namespace VoidJailerMod.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Dive2 {
+            get {
+                object obj = ResourceManager.GetObject("Dive2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Perforate {
             get {
                 object obj = ResourceManager.GetObject("Perforate", resourceCulture);

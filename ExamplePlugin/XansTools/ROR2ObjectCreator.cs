@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using VoidJailerMod.XansTools.ROR2VoidReaverModFixed.XanCode.Data;
 using VRAPI;
 
 namespace VoidJailerMod.XansTools {

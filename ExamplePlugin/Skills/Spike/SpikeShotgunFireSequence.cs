@@ -97,6 +97,15 @@ namespace VoidJailerMod.Skills.Spike {
 			if (HasBuff(BuffProvider.Fury)) {
 				damageCoefficient *= Configuration.SpecialDamageBoost;
 			}
+			if (Configuration.ScaleDamageNotSpeed) {
+				duration = (1f / Configuration.BaseAttackSpeed);
+				float boost = (attackSpeedStat - Configuration.BaseAttackSpeed) + 1f;
+				if (boost >= 1) {
+					damageCoefficient *= boost;
+				}
+
+				attackSpeedStat = Configuration.BaseAttackSpeed;
+			}
 			characterBody.SetAimTimer(duration + 3f);
 			// int bullets = GetNumberOfBullets(characterBody);
 			for (int i = 1; i < Configuration.BasePrimaryProjectileCount; i++) {
@@ -111,14 +120,16 @@ namespace VoidJailerMod.Skills.Spike {
 		}
 
 		public override void PlayAnimation(float duration) {
+			if (Configuration.ScaleDamageNotSpeed) {
+				duration = (1f / Configuration.BaseAttackSpeed);
+				GetModelAnimator().SetFloat(FireAnimationPlaybackRateName, duration);
+			}
 			PlayAnimation(FireAnimationLayerName, FireAnimationStateName, FireAnimationPlaybackRateName, duration);
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
 			return InterruptPriority.Frozen;
 		}
-
-		// private new GameObject projectilePrefab => HasBuff(BuffProvider.Fury) ? ProjectileProvider.ExplosiveSpikeDart : ProjectileProvider.SpikeDart;
 
 		public static string FireAnimationLayerName => EntityStates.VoidJailer.Weapon.Fire.animationLayerName;
 

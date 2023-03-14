@@ -15,14 +15,17 @@ namespace VoidJailerMod {
 	[BepInDependency(R2API.R2API.PluginGUID)]
 	[BepInDependency("Xan.HPBarAPI")]
 	[BepInDependency("com.DrBibop.VRAPI")]
+	[BepInDependency("Xan.VoidPlayerCharacterCommon")]
+	[BepInDependency("Xan.ExaggeratedVoidDeaths")]
+	[BepInDependency("com.rune580.riskofoptions")]
 	[BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-	[R2APISubmoduleDependency(nameof(ItemAPI), nameof(LanguageAPI), nameof(LoadoutAPI), nameof(PrefabAPI))]
+	[R2APISubmoduleDependency(nameof(ItemAPI), nameof(LanguageAPI), nameof(LoadoutAPI), nameof(PrefabAPI), nameof(DamageAPI))]
 	[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
 	public class VoidJailerPlayerPlugin : BaseUnityPlugin {
 		public const string PLUGIN_GUID = PLUGIN_AUTHOR + "." + PLUGIN_NAME;
 		public const string PLUGIN_AUTHOR = "Xan";
 		public const string PLUGIN_NAME = "VoidJailerPlayerCharacter";
-		public const string PLUGIN_VERSION = "1.3.0";
+		public const string PLUGIN_VERSION = "1.3.3";
 		
 		public void Awake() {
 			Log.Init(Logger);

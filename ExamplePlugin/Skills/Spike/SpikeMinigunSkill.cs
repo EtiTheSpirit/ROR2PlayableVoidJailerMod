@@ -97,6 +97,10 @@ namespace VoidJailerMod.Skills.Spike {
 			if (HasBuff(BuffProvider.Fury)) {
 				damageCoefficient *= Configuration.SpecialDamageBoost;
 			}
+			if (Configuration.ScaleDamageNotSpeed) {
+				damageCoefficient *= (attackSpeedStat - Configuration.BaseAttackSpeed) + 1f;
+				attackSpeedStat = Configuration.BaseAttackSpeed;
+			}
 			remainingTime = 0;
 			Transform modelTransform = GetModelTransform();
 			if (modelTransform) {
@@ -199,7 +203,7 @@ namespace VoidJailerMod.Skills.Spike {
 
 		private float _buttonNotPressedTimer = 0;
 
-		public float DelayBetweenShots => INV_BASE_BULLETS_PER_ATTACK_SPEED / attackSpeedStat;
+		public float DelayBetweenShots => Configuration.ScaleDamageNotSpeed ? (INV_BASE_BULLETS_PER_ATTACK_SPEED / Configuration.BaseAttackSpeed) : (INV_BASE_BULLETS_PER_ATTACK_SPEED / attackSpeedStat);
 
 		/// <summary>
 		/// How many bullets are fired per unit of Attack Speed? Note that this is lower because the survivor's default attack speed is 1.45f

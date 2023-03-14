@@ -9,11 +9,6 @@ using UnityEngine;
 namespace VoidJailerMod.Initialization.Sprites {
 	public static class Images {
 
-		private static Stream GetResource(string name) {
-			name = Assembly.GetExecutingAssembly().GetManifestResourceNames().FirstOrDefault(objName => objName.EndsWith(name));
-			return Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
-		}
-
 		public static Sprite Portrait {
 			get {
 				if (_portrait == null) {
@@ -55,7 +50,8 @@ namespace VoidJailerMod.Initialization.Sprites {
 		public static Sprite DiveIcon {
 			get {
 				if (_diveIcon == null) {
-					using (MemoryStream stream = new MemoryStream(Properties.Resources.Dive)) {
+					using (MemoryStream stream = new MemoryStream(Properties.Resources.Dive2)) {
+						// TODO: Dive 1 or 2?
 						_diveIcon = ImageHelper.CreateSprite(stream);
 					}
 				}

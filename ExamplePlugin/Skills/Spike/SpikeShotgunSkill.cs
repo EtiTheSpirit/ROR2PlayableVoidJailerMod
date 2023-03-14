@@ -14,6 +14,10 @@ namespace VoidJailerMod.Skills.Spike {
 
 		public override void OnEnter() {
 			base.OnEnter();
+			if (Configuration.ScaleDamageNotSpeed) {
+				attackSpeedStat = Configuration.BaseAttackSpeed;
+				GetModelAnimator().SetFloat(SpikeAnimationPlaybackRateName, attackSpeedStat);
+			}
 			_totalDuration = SpikeBaseDuration / attackSpeedStat;
 			_crossFadeDuration = _totalDuration * 0.25f;
 			_chargingDuration = _totalDuration - _crossFadeDuration;

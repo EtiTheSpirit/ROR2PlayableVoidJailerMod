@@ -20,6 +20,9 @@ using VoidJailerMod.Skills.Spike;
 using VoidJailerMod.Survivor.Interop;
 using VoidJailerMod.Survivor.Render;
 using VoidJailerMod.XansTools;
+using Xan.ROR2VoidPlayerCharacterCommon;
+using Xan.ROR2VoidPlayerCharacterCommon.DamageBehavior;
+using Xan.ROR2VoidPlayerCharacterCommon.Registration;
 using CharacterBody = RoR2.CharacterBody;
 using Interactor = RoR2.Interactor;
 
@@ -29,6 +32,9 @@ namespace VoidJailerMod.Survivor {
 		private static GameObject playerBodyPrefab;
 
 		public static SurvivorDef Jailer { get; private set; }
+
+
+		public static BodyIndex JailerIndex { get; private set; }
 
 		public static SkillDef DefaultPrimary { get; private set; }
 
@@ -323,10 +329,7 @@ namespace VoidJailerMod.Survivor {
 
 			#region Survivor Hooks
 			Log.LogTrace("Creating method hooks...");
-			On.RoR2.CharacterBody.SetBuffCount += InterceptBuffsEvent;
-			On.RoR2.HealthComponent.TakeDamage += InterceptTakeDamageForVoidResist;
 			On.RoR2.HealthComponent.TakeDamage += InterceptTakeDamageForNullBuff;
-			On.RoR2.HealthComponent.TakeDamage += DoFakeVoidDeath;
 			On.RoR2.HealthComponent.TakeDamage += DoFuryFracture;
 			On.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string += OnUpdatingVFX;
 			On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.RebuildMannequinInstance += OnRebuildMannequinInstance;
@@ -335,12 +338,17 @@ namespace VoidJailerMod.Survivor {
 			On.RoR2.CharacterBody.OnBuffFinalStackLost += OnBuffLost;
 
 			BodyCatalog.availability.CallWhenAvailable(() => {
-				// Register to HPBarAPI.
+				// Register to HPBarAPI and VoidAPI
 				Registry.RegisterColorProvider(plugin, body.bodyIndex, new HPBarColorMarshaller());
 				Log.LogTrace("Custom Void-Style HP Bar colors registered.");
+				XanVoidAPI.RegisterAsVoidEntity(plugin, body.bodyIndex);
+				XanVoidAPI.CreateAndRegisterBlackHoleBehaviorConfigs(plugin, plugin.Config, body.bodyIndex);
+				Localization.LateInit(body.bodyIndex);
+				JailerIndex = body.bodyIndex;
 			});
+			XanVoidAPI.VerifyProperConstruction(body);
 			Log.LogTrace("Survivor init complete.");
-			#endregion
+#endregion
 		}
 
 
@@ -361,6 +369,7 @@ namespace VoidJailerMod.Survivor {
 
 
 #pragma warning disable Publicizer001
+
 
 		private static void OnBuffGained(On.RoR2.CharacterBody.orig_OnBuffFirstStackGained originalMethod, CharacterBody @this, BuffDef buffDef) {
 			originalMethod(@this, buffDef);
@@ -398,7 +407,7 @@ namespace VoidJailerMod.Survivor {
 		/// <param name="this"></param>
 		private static void OnCharacterBodyAwake(On.RoR2.CharacterBody.orig_Awake originalMethod, CharacterBody @this) {
 			originalMethod(@this);
-			if (@this.baseNameToken == Localization.SURVIVOR_NAME) {
+			if (@this.bodyIndex == JailerIndex) {
 				if (!VRInterop.VRAvailable) {
 					ROR2ObjectCreator.GloballySetJailerSkinTransparency(true);
 				}
@@ -439,89 +448,6 @@ namespace VoidJailerMod.Survivor {
 			originalMethod(@this, damageInfo);
 		}
 
-		/// <summary>
-		/// Intent: Do our best to see if damage from a Void Seed / Atmosphere is being dealt, and cancel it.
-		/// </summary>
-		/// <param name="originalMethod"></param>
-		/// <param name="this"></param>
-		/// <param name="damageInfo"></param>
-		private static void InterceptTakeDamageForVoidResist(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
-			if (damageInfo.rejected) {
-				originalMethod(@this, damageInfo);
-				return;
-			}
-
-			if (@this.body != null && @this.body.baseNameToken == Localization.SURVIVOR_NAME) {
-				if (damageInfo.attacker == null && damageInfo.inflictor == null && damageInfo.damageType == (DamageType.BypassBlock | DamageType.BypassArmor)) {
-					Log.LogTrace("Rejecting damage for what I believe to be Void atmosphere damage (it has no source/attacker, and the damage type bypasses blocks and armor only).");
-					damageInfo.rejected = true;
-				}
-			}
-
-			originalMethod(@this, damageInfo);
-		}
-
-		/// <summary>
-		/// Intent: Cancel void fog.
-		/// </summary>
-		/// <param name="originalMethod"></param>
-		/// <param name="this"></param>
-		/// <param name="buffType"></param>
-		/// <param name="newCount"></param>
-		private static void InterceptBuffsEvent(On.RoR2.CharacterBody.orig_SetBuffCount originalMethod, CharacterBody @this, BuffIndex buffType, int newCount) {
-			if (@this.baseNameToken == Localization.SURVIVOR_NAME) {
-				if (buffType == MegaVoidFog || buffType == NormVoidFog || buffType == WeakVoidFog) {
-					Log.LogTrace("Rejecting attempt to add fog to player's status effects.");
-					originalMethod(@this, buffType, 0); // Always 0
-					return;
-				}
-			}
-
-			originalMethod(@this, buffType, newCount);
-		}
-
-		/// <summary>
-		/// Detects when a character dies, and spawns a fake void crit glasses effect. This is used to dramatize the existing void death effect when enemies get killed by the black hole thing. 
-		/// Looks really cool, purely cosmetic.
-		/// </summary>
-		/// <param name="originalMethod"></param>
-		/// <param name="this"></param>
-		/// <param name="damageInfo"></param>
-		private static void DoFakeVoidDeath(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
-			if (damageInfo.rejected) {
-				originalMethod(@this, damageInfo);
-				return;
-			}
-
-			originalMethod(@this, damageInfo);
-			if (damageInfo.HasModdedDamageType(DamageTypeProvider.PerformsFakeVoidDeath)) {
-				if (!@this.alive && @this.wasAlive && @this.body) {
-					Vector3 pos = @this.body.corePosition;
-					float radius = @this.body.bestFitRadius;
-
-					if (damageInfo.attacker) {
-						CharacterBody attacker = damageInfo.attacker.GetComponent<CharacterBody>();
-						if (attacker != null) {
-							EffectManager.SpawnEffect(
-								EffectProvider.SilentVoidCritDeathEffect,
-								new EffectData {
-									origin = pos,
-									scale = radius
-								},
-								true
-							);
-						}
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Similar to <see cref="DoFakeVoidDeath(On.RoR2.HealthComponent.orig_TakeDamage, HealthComponent, DamageInfo)"/>, this spawns the cromch effect from Collapse.
-		/// </summary>
-		/// <param name="originalMethod"></param>
-		/// <param name="this"></param>
-		/// <param name="damageInfo"></param>
 		private static void DoFuryFracture(On.RoR2.HealthComponent.orig_TakeDamage originalMethod, HealthComponent @this, DamageInfo damageInfo) {
 			if (damageInfo.rejected) {
 				originalMethod(@this, damageInfo);
@@ -543,50 +469,6 @@ namespace VoidJailerMod.Survivor {
 		}
 
 #pragma warning restore Publicizer001
-
-		#region Values To Remember
-
-		/// <summary>
-		/// A reference to the highest power void fog.
-		/// </summary>
-		public static BuffIndex MegaVoidFog {
-			get {
-				if (_megaVoidFog == BuffIndex.None) {
-					_megaVoidFog = DLC1Content.Buffs.VoidRaidCrabWardWipeFog.buffIndex;
-				}
-				return _megaVoidFog;
-			}
-		}
-
-		/// <summary>
-		/// A reference to ordinary void fog.
-		/// </summary>
-		public static BuffIndex NormVoidFog {
-			get {
-				if (_normVoidFog == BuffIndex.None) {
-					_normVoidFog = RoR2Content.Buffs.VoidFogStrong.buffIndex;
-				}
-				return _normVoidFog;
-			}
-		}
-
-		/// <summary>
-		/// A reference to weak void fog.
-		/// </summary>
-		public static BuffIndex WeakVoidFog {
-			get {
-				if (_weakVoidFog == BuffIndex.None) {
-					_weakVoidFog = RoR2Content.Buffs.VoidFogMild.buffIndex;
-				}
-				return _weakVoidFog;
-			}
-		}
-
-		private static BuffIndex _megaVoidFog = BuffIndex.None;
-		private static BuffIndex _normVoidFog = BuffIndex.None;
-		private static BuffIndex _weakVoidFog = BuffIndex.None;
-
-		#endregion
 
 	}
 }

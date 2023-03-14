@@ -124,6 +124,9 @@
   <data name="Dive" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Dive.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Dive2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Dive2.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Perforate" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Perforate.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

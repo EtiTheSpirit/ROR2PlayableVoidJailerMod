@@ -82,6 +82,11 @@ namespace VoidJailerMod {
 		/// </summary>
 		public static bool HomingPrimaryProjectiles => _primaryProjectileBehavior.Value.HasFlag(AimHelperType.HomingProjectiles);
 
+		/// <summary>
+		/// If true, Attack Speed increases the damage of Spike and Perforate rather than making them shoot faster.
+		/// </summary>
+		public static bool ScaleDamageNotSpeed => _scaleDamageNotSpeed.Value;
+
 		#endregion
 
 		#region Secondary Attack
@@ -164,10 +169,19 @@ namespace VoidJailerMod {
 		/// </summary>
 		public static float CameraPivotOffset => _cameraPivotOffset.Value;
 
+		/// <summary>
+		/// The transparency of the local player whilst in combat.
+		/// </summary>
 		public static float LocalTransparencyInCombat => _transparencyInCombat.Value;
 
+		/// <summary>
+		/// The transparency of the local player whilst outside of combat.
+		/// </summary>
 		public static float LocalTransparencyOutOfCombat => _transparencyOutOfCombat.Value;
 
+		/// <summary>
+		/// Provides additional aim compensation in VR mode.
+		/// </summary>
 		public static bool VRExtendedAimCompensation => _vrAimCompensation.Value;
 
 		#endregion
@@ -217,6 +231,7 @@ namespace VoidJailerMod {
 		private static ConfigEntry<float> _nullifiedDamageBoost;
 		private static ConfigEntry<int> _basePrimaryProjectiles;
 		private static ConfigEntry<AimHelperType> _primaryProjectileBehavior;
+		private static ConfigEntry<bool> _scaleDamageNotSpeed;
 		#endregion
 
 		#region Secondary Attack
@@ -354,17 +369,17 @@ namespace VoidJailerMod {
 			}));
 
 			_transparencyInCombat = MakeFloat01Entry("Transparency In Danger", string.Format(FMT_TRANSPARENCY, "in combat"), 75);
-			_transparencyOutOfCombat = MakeFloat01Entry("Transparency Out Of Danger", string.Format(FMT_TRANSPARENCY, "not in combat"), 25);
+			_transparencyOutOfCombat = MakeFloat01Entry("Transparency Out Of Danger", string.Format(FMT_TRANSPARENCY, "not in combat"), 0);
 
 			cfg.SettingChanged += OnSettingChanged;
 
 			// TODO: I would *like* to get RiskOfOptions support but there are two critical issues preventing that
 
 			_baseMaxHealth = Bind("1. Character Stats", "Base Maximum Health", 200f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "maximum health"), MinOnlyF(1f)));
-			_levelMaxHealth = Bind("1. Character Stats", "Leveled Maximum Health", 40f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "maximum health"), MinOnlyF()));
+			_levelMaxHealth = Bind("1. Character Stats", "Leveled Maximum Health", 30f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "maximum health"), MinOnlyF()));
 			_baseHPRegen = Bind("1. Character Stats", "Base Health Regeneration Rate", 1f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "health regeneration"), MinOnlyF()));
 			_levelHPRegen = Bind("1. Character Stats", "Leveled Health Regeneration Rate", 0.2f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "health regeneration"), MinOnlyF()));
-			_baseArmor = Bind("1. Character Stats", "Base Armor", 20f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "armor"), MinOnlyF()));
+			_baseArmor = Bind("1. Character Stats", "Base Armor", 40f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "armor"), MinOnlyF()));
 			_levelArmor = Bind("1. Character Stats", "Leveled Armor", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "armor"), MinOnlyF()));
 			_baseMaxShield = Bind("1. Character Stats", "Base Maximum Shield", 0f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "maximum shield"), MinOnlyF()));
 			_levelMaxShield = Bind("1. Character Stats", "Leveled Maximum Shield", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "maximum shield"), MinOnlyF()));
@@ -377,14 +392,15 @@ namespace VoidJailerMod {
 			_baseJumpPower = Bind("2. Character Agility", "Base Jump Power", 20f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "amount of upward jump force"), MinOnlyF()));
 			_levelJumpPower = Bind("2. Character Agility", "Leveled Jump Power", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "amount of upward jump force"), MinOnlyF()));
 
-			_basePrimaryDamage = Bind("3a. Character Primary", "Primary Damage", 2f, StaticDeclareConfigDescription(string.Format(FMT_DAMAGE, "Spike"), MinOnlyF()));
-			_nullifiedDamageBoost = Bind("3a. Character Primary", "Nullified Damage Boost", 1.25f, StaticDeclareConfigDescription("When a target is nullified (such as with Bind, the Tentabauble, or by a Reaver), the damage of Spike (and Perforate) gets multiplied by this value and then added to itself, such that a value of 0 provides no damage boost, a value of 1 adds the damage to (1 * itself) (this doubles it), 2 adds the damage to (2 * itself) (this triples it), so on.", MinOnlyF(0)));
+			_basePrimaryDamage = Bind("3a. Character Primary", "Primary Damage", 1.25f, StaticDeclareConfigDescription(string.Format(FMT_DAMAGE, "Spike"), MinOnlyF()));
+			_nullifiedDamageBoost = Bind("3a. Character Primary", "Nullified Damage Boost", 2f, StaticDeclareConfigDescription("When a target is nullified (such as with Bind, the Tentabauble, or by a Reaver), the damage of Spike (and Perforate) gets multiplied by this value and then added to itself, such that a value of 0 provides no damage boost, a value of 1 adds the damage to (1 * itself) (this doubles it), 2 adds the damage to (2 * itself) (this triples it), so on.", MinOnlyF(0)));
 			_basePrimaryProjectiles = Bind("3a. Character Primary", "Default Projectile Count", 12, StaticDeclareConfigDescription("The amount of Projectiles used in the Spike ability.", MinOnlyI(1)));
 			_primaryProjectileBehavior = Bind("3a. Character Primary", "Projectile Behavior", AimHelperType.HomingProjectiles, StaticDeclareConfigDescription("All other survivors with slow projectiles usually accompany them with auto-aim/homing. This setting can be used to alter the Jailer's projectiles to be faster, to follow targets, or both."));
+			_scaleDamageNotSpeed = Bind("3a. Character Primary", "Attack Speed Increases Damage", false, StaticDeclareConfigDescription("Enabling this will put you at a disadvantage, but creates an alternative playstyle. As attack speed increases, instead of making Spike and Perforate shoot faster, they will instead do more damage per dart, as a proportion of attack speed boost."));
 			// Cooldown?
 
 			_baseSecondaryDamage = Bind("3b. Character Secondary", "Secondary Damage", 0.8f, StaticDeclareConfigDescription(string.Format(FMT_DAMAGE, "Bind"), MinOnlyF()));
-			_baseSecondarySap = Bind("3b. Character Secondary", "Lifesteal Percentage", 0.2f, StaticDeclareConfigDescription("The amount of health that you heal when using Bind, as a percentage of your maximum health.", new AcceptableValueRange<float>(0f, 1f)));
+			_baseSecondarySap = Bind("3b. Character Secondary", "Lifesteal Percentage", 0.15f, StaticDeclareConfigDescription("The amount of health that you heal when using Bind, as a percentage of your maximum health.", new AcceptableValueRange<float>(0f, 1f)));
 			_secondaryNullifyDuration = Bind("3b. Character Secondary", "Nullify Duration", 10f, StaticDeclareConfigDescription("The duration that Nullify lasts for on enemies when hit with Bind.", MinOnlyF(0)));
 			_secondaryNullifyBoss = Bind("3b. Character Secondary", "Nullify Duration (Bosses)", 5f, StaticDeclareConfigDescription("The duration that Nullify lasts for on bosses hit with Bind. Set to 0 to prevent it entirely.", MinOnlyF(0)));
 
@@ -393,15 +409,15 @@ namespace VoidJailerMod {
 			_utilityDuration = Bind("3c. Character Utility", "Dive Duration", 1f, StaticDeclareConfigDescription("The amount of time, in seconds, that Dive hides and moves the player for.", MinOnlyF()));
 
 			_specialDuration = Bind("3d. Character Special", "Rage Duration", 10f, StaticDeclareConfigDescription("The amount of time, in seconds, that Rage of the Warden lasts.", MinOnlyF()));
-			_specialArmorBoost = Bind("3d. Character Special", "Rage Armor Boost", 100f, StaticDeclareConfigDescription("The amount of armor that the player earns while under the effects of Rage of the Warden", MinOnlyF()));
+			_specialArmorBoost = Bind("3d. Character Special", "Rage Armor Boost", 200f, StaticDeclareConfigDescription("The amount of armor that the player earns while under the effects of Rage of the Warden", MinOnlyF()));
 			_specialDamageBoost = Bind("3d. Character Special", "Rage Damage Boost", 3f, StaticDeclareConfigDescription("The amount of damage that the player gets while under the effects of Rage of the Warden. All damage is multiplied by this value.", MinOnlyF()));
 			// _specialExtraProjectiles = Bind("3d. Character Special", "Rage Additional Projectiles", 3f, StaticDeclareConfigDescription("The amount of projectiles that the primary fires is multiplied by this amount (and rounded) while under the effects of Rage of the Warden.", MinOnlyF()));
 
-			_baseDamage = Bind("4. Character Combat", "Base Damage", 7f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
+			_baseDamage = Bind("4. Character Combat", "Base Damage", 12f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
 			_levelDamage = Bind("4. Character Combat", "Leveled Damage", 2.4f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "damage output") + " Other damage values are multiplied with this.", MinOnlyF()));
 			_baseCritChance = Bind("4. Character Combat", "Base Crit Chance", 0f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "critical hit chance") + " This is an integer percentage from 0 to 100, not 0 to 1.", new AcceptableValueRange<float>(0, 100)));
 			_levelCritChance = Bind("4. Character Combat", "Leveled Crit Chance", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "critical hit chance") + " This is an integer percentage from 0 to 100, not 0 to 1.", new AcceptableValueRange<float>(0, 100)));
-			_baseAttackSpeed = Bind("4. Character Combat", "Base Attack Speed", 1.45f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "attack rate"), MinOnlyF()));
+			_baseAttackSpeed = Bind("4. Character Combat", "Base Attack Speed", 1.5f, StaticDeclareConfigDescription(string.Format(FMT_DEFAULT, "attack rate"), MinOnlyF()));
 			_levelAttackSpeed = Bind("4. Character Combat", "Leveled Attack Speed", 0f, StaticDeclareConfigDescription(string.Format(FMT_LEVELED, "attack rate"), MinOnlyF()));
 
 			_useFullSizeCharacter = Bind("5. Character Specifics", "Use Full Size Jailer", false, "This MUST be synchronized between players in multiplayer, or people will sink into the floor / float! By default, the mod sets the Jailer's scale to 50% that of its natural size. Turning this on will make you the same size as a normal Jailer. **WARNING** This setting is known to cause collision issues. Some areas are impossible to reach.");
@@ -413,6 +429,13 @@ namespace VoidJailerMod {
 				description = "<style=cDeath>This MUST be synchronized between players in multiplayer, or people will sink into the floor / float!</style>\n\nBy default, the mod sets the Jailer's scale to 50% that of its natural size. Turning this on will make you the same size as a normal Jailer.\n\n<style=cIsDamage>This setting is known to cause collision issues. Additionally, some areas are impossible to reach, making it possible to softlock yourself.</style>",
 				category = "Character",
 				restartRequired = true
+			}));
+
+			RiskOfOptions.ModSettingsManager.AddOption(new CheckBoxOption(_vrAimCompensation, new CheckBoxConfig {
+				name = "VR Aim Compensation",
+				description = "<style=cDeath>This only applies in VR.</style>\n\nEnabling this option will make the homing cone for Spike/Perforate and the hitbox for Bind marginally wider, making it easier to hit shots.\n\nIn general, this is recommended as the increased scale makes aiming feel rather poor compared to playing on Desktop.",
+				category = "VR",
+				restartRequired = false
 			}));
 
 			Log.LogInfo("User configs initialized.");

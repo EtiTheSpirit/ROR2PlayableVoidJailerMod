@@ -10,12 +10,12 @@ using UnityEngine.Networking;
 
 namespace VoidJailerMod.Effects {
 	public static class EffectProvider {
-
+#if !USE_VOID_CHARACTER_API
 		/// <summary>
 		/// A variation of the crit goggles kill effect that does not emit a sound. This is not immediately set and may be null if referenced in a mod's init cycle.
 		/// </summary>
 		public static GameObject SilentVoidCritDeathEffect { get; private set; }
-
+#endif
 		/// <summary>
 		/// The crunchy explode effect on Collapse.
 		/// </summary>
@@ -31,8 +31,9 @@ namespace VoidJailerMod.Effects {
 
 
 		internal static void Init() {
+#if !USE_VOID_CHARACTER_API
 			On.RoR2.HealthComponent.AssetReferences.Resolve += InterceptHealthCmpAssetReferences;
-
+#endif
 			Log.LogTrace("Creating Collapse explode effect...");
 			CollapseExplode = CreateNetworkedCloneFromPath("RoR2/DLC1/BleedOnHitVoid/FractureImpactEffect.prefab", "FastFractureImpactEffect");
 
@@ -62,6 +63,7 @@ namespace VoidJailerMod.Effects {
 			return o;
 		}
 
+#if !USE_VOID_CHARACTER_API
 		private static void InterceptHealthCmpAssetReferences(On.RoR2.HealthComponent.AssetReferences.orig_Resolve originalMethod) {
 			originalMethod();
 			SilentVoidCritDeathEffect = PrefabAPI.InstantiateClone(HealthComponent.AssetReferences.critGlassesVoidExecuteEffectPrefab, "SilentVoidCritDeathJailer");
@@ -72,6 +74,7 @@ namespace VoidJailerMod.Effects {
 			On.RoR2.HealthComponent.AssetReferences.Resolve -= InterceptHealthCmpAssetReferences; // Clean up!
 			Log.LogTrace("Instantiated prefab for silent void crit death effect.");
 		}
+#endif
 
 	}
 }

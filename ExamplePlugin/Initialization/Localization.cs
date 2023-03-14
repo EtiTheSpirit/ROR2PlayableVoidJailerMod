@@ -1,9 +1,11 @@
 ﻿using R2API;
+using RoR2;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using VoidJailerMod.Skills.Spike;
+using Xan.ROR2VoidPlayerCharacterCommon;
 
 namespace VoidJailerMod
 {
@@ -124,36 +126,30 @@ namespace VoidJailerMod
 
 			#region Passive
 			string voidBornIntro = "The Void Jailer inherits all of the benefits and drawbacks of its kin.";
-			string desc = $"[ Reave ]\n<style=cSub>Upon death, <style=cIsVoid>Reave</style> is triggered, firing a small black hole that <style=cIsDamage>instantly kills</style> all monsters <style=cIsDamage>and players</style> caught within.";
-			if (Configuration.VoidImmunity) {
-				desc += "\n\n[ Void Entity ]\n<style=cSub>Grants <style=cIsUtility>immunity</style> to the Void's <style=cIsVoid>passive environmental damage</style> and <style=cIsVoid>fog</style>.</style>";
-			}
-
 			Bind(PASSIVE_NAME, "<style=cIsVoid>Void Entity</style>");
-			Bind(PASSIVE_KEYWORD, desc);
 			Bind(PASSIVE_DESC, voidBornIntro);
 			#endregion
 
 			#region Primary
 			Bind(SKILL_PRIMARY_SHOTGUN_NAME, "Spike");
-			Bind(SKILL_PRIMARY_SHOTGUN_DESC, $"Fire a burst of spikes from your claw, dealing <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.BasePrimaryDamage)}</style> damage</style>. Damage is boosted by <style=cIsDamage>{Percentage(Configuration.NullifiedDamageBoost)}</style> on targets that are <style=cIsVoid>Nullified</style> or <style=cIsVoid>Tethered</style>.");
+			Bind(SKILL_PRIMARY_SHOTGUN_DESC, $"Fire a burst of Void Darts from your claw, dealing <style=cIsDamage><style=cUserSetting>{Configuration.BasePrimaryProjectileCount}</style>x<style=cUserSetting>{Percentage(Configuration.BasePrimaryDamage)}</style> damage</style>. Damage is boosted by <style=cUserSetting>{Percentage(Configuration.NullifiedDamageBoost)}</style> on targets that are <style=cIsVoid>Nullified</style> or <style=cIsVoid>Tethered</style>.");
 
 			Bind(SKILL_PRIMARY_MINIGUN_NAME, "Perforate");
-			Bind(SKILL_PRIMARY_MINIGUN_DESC, $"The firerate of your claw has increased dramatically, but less spikes are shot per burst.");
+			Bind(SKILL_PRIMARY_MINIGUN_DESC, $"The firerate of your claw has increased dramatically, but less Darts are shot per burst.");
 			#endregion
 
 			#region Secondary
 			Bind(SKILL_SECONDARY_NAME, "Bind");
-			Bind(SKILL_SECONDARY_DESC, $"Latch onto an enemy from a distance, applying a force that tries to pull them directly in front of you. Deals <style=cIsDamage><style=cUserSetting>{Percentage(Configuration.BaseSecondaryDamage)}</style> damage</style> and inflicts <style=cIsVoid>Nullify</style>. Heals <style=cIsHealing>{Percentage(Configuration.SecondaryHealAmountOnHit)} maximum health</style>.");
+			Bind(SKILL_SECONDARY_DESC, $"Latch onto an enemy from a distance, applying a force that tries to pull them directly in front of you. Deals <style=cIsDamage><style=cUserSetting>{Percentage(Configuration.BaseSecondaryDamage)}</style> damage</style> and inflicts <style=cIsVoid>Nullify</style>. Heals <style=cIsHealing><style=cUserSetting>{Percentage(Configuration.SecondaryHealAmountOnHit)}</style> maximum health</style>.");
 			#endregion
 
 			#region Utility
 			Bind(SKILL_UTILITY_NAME, "Dive");
-			Bind(SKILL_UTILITY_DESC, $"Propel yourself through the void at <style=cUserSetting>{Percentage(Configuration.UtilitySpeed)} movement speed</style> for <style=cUserSetting>{RoundTen(Configuration.UtilityDuration)} {LazyPluralize("second", Configuration.UtilityDuration)}</style>, healing <style=cIsHealing>{Percentage(Configuration.UtilityRegeneration)} maximum health</style>. Gain <style=cIsUtility>Immunity</style> and <style=cIsUtility>Invisibility</style> while away.");
+			Bind(SKILL_UTILITY_DESC, $"Propel yourself through the void at <style=cIsUtility><style=cUserSetting>{Percentage(Configuration.UtilitySpeed)}</style> movement speed</style> for <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.UtilityDuration)}</style> {LazyPluralize("second", Configuration.UtilityDuration)}</style>, healing <style=cIsHealing><style=cUserSetting>{Percentage(Configuration.UtilityRegeneration)}</style> maximum health</style>. Gain <style=cIsUtility>Immunity</style> and <style=cIsUtility>Invisibility</style> while away.");
 			#endregion
 
 			string commonSpecialStatDesc = $"Gain <style=cIsUtility><style=cUserSetting>{RoundTen(Configuration.SpecialArmorBoost)}</style> Armor</style> and replace <style=cIsVoid>Spike</style> with <style=cIsVoid>Perforate</style>.";
-			string perforateDesc = $"<style=cIsUtility>Fully automatic. Agile.</style> Fire projectiles much more frequently, but with less projectiles per burst. Attacks inflict <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Mathf.CeilToInt(Configuration.BasePrimaryProjectileCount * SpikeMinigunSkill.BASE_BULLETS_PER_BURST_AS_FRAC)}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
+			string perforateDesc = $"<style=cIsUtility>Can be fired while sprinting.</style> Void Darts are augmented, firing much faster and causing them to inflict <style=cIsVoid>Instant Collapse</style>, causing them to do a total of <style=cIsDamage><style=cUserSetting>{Mathf.CeilToInt(Configuration.BasePrimaryProjectileCount * SpikeMinigunSkill.BASE_BULLETS_PER_BURST_AS_FRAC)}</style>x<style=cUserSetting>{Percentage(Configuration.SpecialDamageBoost * Configuration.BasePrimaryDamage)}</style> damage</style>.";
 
 			#region Special
 			Bind(SKILL_SPECIAL_NAME, "Fury of the Warden");
@@ -169,8 +165,17 @@ namespace VoidJailerMod
 			Log.LogTrace("Localization initialized.");
 		}
 
+		internal static void LateInit(BodyIndex jailer) {
+			string blackHoleDesc = XanVoidAPI.BuildBlackHoleDescription(jailer, true);
+			string desc = $"[ Reave ]\n<style=cSub>Upon death, {blackHoleDesc}";
+			desc += "\n\n[ Void Entity ]\n<style=cSub>The Void Jailer is <style=cIsUtility>immune</style> to <style=cIsVoid>Void Fog</style>, and will not take damage within <style=cIsVoid>Void Seeds</style> or whilst outside the range of a protective bubble in Void environments.</style>";
+
+			Bind(PASSIVE_KEYWORD, desc);
+		}
 		// TO SELF: The idea was that Void figured out survivors killed Providence, they want to take Mithrix, suspect the survivors are strong enough to do that too and so they try to work with the players
-		private const string THE_LORE = @"what is ligma";
+		private const string THE_LORE = @"""Yes, that's correct. I did indeed fry that rice.""
+		
+- Void Jailer, End of Time";
 
 	}
 }

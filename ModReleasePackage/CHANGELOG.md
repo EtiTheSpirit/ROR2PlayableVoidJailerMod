@@ -1,9 +1,24 @@
-## 1.3.2
+## 1.3.3
 <details open>
-<summary><strong>About time!</strong></summary>
+<summary><strong>Hey kid, wanna buy some APIs?</strong></summary>
 <br/>
 <ul>
-<li>Added icons for the abilities and rage buff.</li>
+<li>Implemented the new Common Void Player API</li>
+<li>The damage for the black hole (Reave) is now configurable much like it was with the Jailer. This is, by default, configured via the Common Player API's settings, but this mod has its own separate settings too that can be used instead.</li>
+<li>Fixed a bug causing the Game Over screen to still show even after reviving.</li>
+</details>
+
+## 1.3.2
+<details>
+<summary><strong>General improvements and Icons</strong></summary>
+<br/>
+<ul>
+<li><strong>Config defaults have changed.</strong> After hours of playing and tweaking stats between runs casually, I have come up with what I believe are adequate defaults for new people. I will take insight on these stats.</li>
+<li>A unique survivor icon for the Jailer now exists (its just the normal icon with a blue outline lul).</li>
+<li>Spike, Bind, Dive, Perforate, and Fury of the Warden all have ability icons now.</li>
+<li>The Game Over screen is now delayed, allowing you to see the full death animation instead of blurring it part way through.</li>
+<li>A new configuration option has been added that is admittedly not very useful (I just needed it for film-making), which turns attack speed into damage. The base attack speed applies, but all increases beyond that will add damage instead of speed.</li>
+<li>The VR Aim Compensation configuration value can now be changed in-game via Risk of Options.</li>
 </details>
 
 ## 1.3.1

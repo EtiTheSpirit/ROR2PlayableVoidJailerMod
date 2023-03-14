@@ -5,9 +5,17 @@
     <LangVersion>preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
-    <Version>1.3.2</Version>
-    <FileVersion>1.2.2</FileVersion>
-    <AssemblyVersion>1.2.2</AssemblyVersion>
+    <Version>1.3.3</Version>
+    <FileVersion>1.3.3</FileVersion>
+    <AssemblyVersion>1.3.3</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);USE_VOID_CHARACTER_API</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);USE_VOID_CHARACTER_API</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -74,6 +82,9 @@
     </Reference>
     <Reference Include="ROR2HPBarAPI">
       <HintPath>..\..\ROR2HPBarAPI\ROR2HPBarAPI\bin\Release\netstandard2.0\ROR2HPBarAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="ROR2VoidPlayerCharacterCommon">
+      <HintPath>..\..\ROR2VoidPlayerCharacterCommon\ROR2VoidPlayerCharacterCommon\bin\Release\netstandard2.0\ROR2VoidPlayerCharacterCommon.dll</HintPath>
     </Reference>
     <Reference Include="SimpleJSON">
       <HintPath>libs\SimpleJSON.dll</HintPath>

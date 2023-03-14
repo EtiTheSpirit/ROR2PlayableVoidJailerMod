@@ -16,8 +16,6 @@ namespace VoidJailerMod.Damage {
 
 		public static GameObject ExplosiveSpikeDart { get; private set; }
 
-		public static GameObject ExaggeratedDeathBombProjectile { get; private set; }
-
 		/// <summary>
 		/// A helper value to return the maximum distance of the projectile.
 		/// </summary>
@@ -53,16 +51,9 @@ namespace VoidJailerMod.Damage {
 			ExplosiveSpikeDart.AddComponent<NetworkIdentity>();
 			ExplosiveSpikeDart.GetComponent<ModdedDamageTypeHolderComponent>().Add(DamageTypeProvider.PerformsFastFracture);
 
-
-			Log.LogTrace("Creating death bomb projectile...");
-			ExaggeratedDeathBombProjectile = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidJailer/VoidJailerDeathBombProjectile.prefab").WaitForCompletion(), "ExaggeratedVoidJailerDeathBomb");
-			ModdedDamageTypeHolderComponent holder = ExaggeratedDeathBombProjectile.AddComponent<ModdedDamageTypeHolderComponent>();
-			holder.Add(DamageTypeProvider.PerformsFakeVoidDeath);
-
 			Log.LogTrace("Registering projectiles...");
 			ContentAddition.AddProjectile(SpikeDart);
 			ContentAddition.AddProjectile(ExplosiveSpikeDart);
-			ContentAddition.AddProjectile(ExaggeratedDeathBombProjectile);
 			SpikeMaxDistance = projectile.desiredForwardSpeed * projectile.lifetime;
 
 			Log.LogTrace("Projectile init complete.");
