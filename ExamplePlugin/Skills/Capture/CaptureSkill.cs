@@ -11,8 +11,8 @@ namespace VoidJailerMod.Skills.Capture {
 	public class CaptureSkill : BaseState {
 		public override void OnEnter() {
 			base.OnEnter();
-			duration = 1;
-			duration /= attackSpeedStat;
+			StartAimMode(3f);
+			duration = 1 / attackSpeedStat;
 			_crossFadeDuration = duration * 0.25f;
 			PlayCrossfade(AnimationLayerName, AnimationStateName, AnimationPlaybackRateName, duration, _crossFadeDuration);
 			soundID = Util.PlayAttackSpeedSound(EnterSoundString, gameObject, attackSpeedStat);
@@ -60,8 +60,6 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public static string AnimationPlaybackRateName => EntityStates.VoidJailer.Weapon.ChargeCapture.animationPlaybackRateName;
 
-		public static float duration;
-
 		public static string EnterSoundString => EntityStates.VoidJailer.Weapon.ChargeCapture.enterSoundString;
 
 		public static GameObject ChargeEffectPrefab => EntityStates.VoidJailer.Weapon.ChargeCapture.chargeEffectPrefab;
@@ -75,5 +73,7 @@ namespace VoidJailerMod.Skills.Capture {
 		private uint soundID;
 
 		private GameObject attackIndicatorInstance;
+
+		public float duration;
 	}
 }

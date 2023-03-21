@@ -75,11 +75,18 @@ namespace VoidJailerMod.Skills.Capture {
 					targetHurtBox.healthComponent.TakeDamageForce(direction * mass, true, true);
 					targetHurtBox.healthComponent.TakeDamage(damageInfo);
 					GlobalEventManager.instance.OnHitEnemy(damageInfo, targetHurtBox.healthComponent.gameObject);
+					if (isAuthority) {
+						SetStateOnHurt hurtState = targetHurtBox.healthComponent.body.GetComponent<SetStateOnHurt>();
+						float stunDuration = Configuration.SecondaryStunDuration;
+						if (hurtState && stunDuration > 0) {
+							hurtState.SetStun(stunDuration);
+						}
+					}
 					characterBody.healthComponent.Heal(Configuration.SecondaryHealAmountOnHit * characterBody.maxHealth, default);
 					if (PullTracerPrefab) {
 						Vector3 position = targetHurtBox.transform.position;
 						Vector3 start = aimRay.origin;
-						Transform transform =  FindModelChild(MuzzleString);
+						Transform transform = FindModelChild(MuzzleString);
 						if (transform && !VRInterop.VRAvailable) {
 							// In VR, the hand aim ray is the muzzle, so just keep the existing value.
 							start = transform.position;
@@ -146,7 +153,7 @@ namespace VoidJailerMod.Skills.Capture {
 		}
 		private static GameObject _muzzleFlash = null;
 
-		public string MuzzleString { get; set; }
+		public string MuzzleString { get; } = "TentacleMuzzle";
 
 		private float Duration { get; set; }
 	}

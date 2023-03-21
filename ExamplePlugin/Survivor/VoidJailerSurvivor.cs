@@ -336,6 +336,7 @@ namespace VoidJailerMod.Survivor {
 			survivorDef.bodyPrefab = _playerBodyPrefab;
 			survivorDef.descriptionToken = Localization.SURVIVOR_DESC;
 			survivorDef.displayNameToken = Localization.SURVIVOR_NAME;
+			survivorDef.cachedName = survivorDef.displayNameToken;
 			survivorDef.outroFlavorToken = Localization.SURVIVOR_OUTRO;
 			survivorDef.mainEndingEscapeFailureFlavorToken = Localization.SURVIVOR_OUTRO_FAILED;
 			survivorDef.displayPrefab = playerBodyDisplayPrefab;

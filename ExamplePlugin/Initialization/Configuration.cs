@@ -81,9 +81,14 @@ namespace VoidJailerMod.Initialization {
 		public static float SecondaryNullifyBossDuration => _secondaryNullifyBoss.Value;
 
 		/// <summary>
-		/// The colldown of Bind
+		/// The cooldown of Bind
 		/// </summary>
 		public static float SecondaryCooldown => _secondaryCooldown.Value;
+
+		/// <summary>
+		/// If nonzero, this is how long a stun is applied to the character for.
+		/// </summary>
+		public static float SecondaryStunDuration => _secondaryStunDuration.Value;
 
 		#endregion
 
@@ -252,6 +257,8 @@ namespace VoidJailerMod.Initialization {
 		private static ReplicatedConfigEntry<float> _secondaryNullifyBoss;
 		[ReplicatedConfiguration]
 		private static ReplicatedConfigEntry<float> _secondaryCooldown;
+		[ReplicatedConfiguration]
+		private static ReplicatedConfigEntry<float> _secondaryStunDuration;
 		#endregion
 
 		#region Utility
@@ -364,6 +371,7 @@ namespace VoidJailerMod.Initialization {
 			_secondaryNullifyDuration = aCfg.BindReplicated("Bind Duration (Monsters)", "How long the Nullify effect lasts when applied on monsters.", 10f, 0f, 30f, 1f, formatString: "{0}s");
 			_secondaryNullifyBoss = aCfg.BindReplicated("Bind Duration (Bosses)", "How long the Nullify effect lasts when applied to bosses.", 5f, 0f, 30f, 1f, formatString: "{0}s");
 			_secondaryCooldown = aCfg.BindReplicated("Bind Cooldown", "The cooldown of the Bind ability", 4f, 0.5f, 20f, 0.5f, formatString: "{0}s");
+			_secondaryStunDuration = aCfg.BindReplicated("Bind Stun Duration", "If non-zero, enemies struck with Bind will be stunned (if they can be stunned) for this amount of time.", 3.5f, 0f, 10f, 0.5f, AdvancedConfigBuilder.RestartType.NoRestartRequired, "{0}s");
 
 			aCfg.SetCategory("Dive");
 			_utilitySpeed = aCfg.BindFloatPercentageReplicated("Dive Speed Multiplier", "The speed at which Dive moves the player, as a percentage of the base Walk Speed", 400, 0, 1000);

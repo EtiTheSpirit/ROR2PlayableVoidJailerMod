@@ -2,7 +2,7 @@
 	"name": "VoidJailerPlayerCharacter",
 	"version_number": "2.0.0",
 	"website_url": "https://github.com/EtiTheSpirit/ROR2PlayableVoidJailerMod",
-	"description": "Now with networked configs! Allows the player to play as a Void Jailer. Go feed a bottom you bottom feeder.",
+	"description": "Now with networked (synchronized) configs, editable on the fly! Allows the player to play as a Void Jailer. Go feed a bottom you bottom feeder.",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.9",
 		"RiskofThunder-HookGenPatcher-1.2.3",
