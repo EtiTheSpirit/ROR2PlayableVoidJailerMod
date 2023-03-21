@@ -10,7 +10,9 @@ using UnityEngine;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
+using VoidJailerMod.Initialization;
 using VoidJailerMod.XansTools;
+using Xan.ROR2VoidPlayerCharacterCommon.VRMod;
 
 namespace VoidJailerMod.Skills.Spike {
 	public class SpikeMinigunSkill : GenericProjectileBaseState, VRInterop.IAimRayProvider {
@@ -95,11 +97,11 @@ namespace VoidJailerMod.Skills.Spike {
 			// Done
 
 			if (HasBuff(BuffProvider.Fury)) {
-				damageCoefficient *= Configuration.SpecialDamageBoost;
+				damageCoefficient *= Configuration.SpecialRageDamageBoost;
 			}
 			if (Configuration.ScaleDamageNotSpeed) {
-				damageCoefficient *= (attackSpeedStat - Configuration.BaseAttackSpeed) + 1f;
-				attackSpeedStat = Configuration.BaseAttackSpeed;
+				damageCoefficient *= (attackSpeedStat - Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed) + 1f;
+				attackSpeedStat = Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed;
 			}
 			remainingTime = 0;
 			Transform modelTransform = GetModelTransform();
@@ -119,7 +121,7 @@ namespace VoidJailerMod.Skills.Spike {
 		}
 
 		public override Ray ModifyProjectileAimRay(Ray aimRay) {
-			aimRay.origin += UnityEngine.Random.insideUnitSphere * (MaxRandomDistance * 0.15f) / (Configuration.UseFullSizeCharacter ? 1f : 2f);
+			aimRay.origin += UnityEngine.Random.insideUnitSphere * (MaxRandomDistance * 0.15f) / (Configuration.CommonVoidEnemyConfigs.UseFullSizeCharacter ? 1f : 2f);
 			return aimRay;
 		}
 
@@ -153,7 +155,7 @@ namespace VoidJailerMod.Skills.Spike {
 				remainingTime -= Time.fixedDeltaTime;
 				if (remainingTime <= 0) {
 					remainingTime = DelayBetweenShots;
-					int numBullets = Mathf.CeilToInt(Configuration.BasePrimaryProjectileCount * BASE_BULLETS_PER_BURST_AS_FRAC);
+					int numBullets = Configuration.SpecialRageProjectileCount;
 					for (int i = 0; i < numBullets; i++) {
 						FireProjectile();
 					}
@@ -203,18 +205,13 @@ namespace VoidJailerMod.Skills.Spike {
 
 		private float _buttonNotPressedTimer = 0;
 
-		public float DelayBetweenShots => Configuration.ScaleDamageNotSpeed ? (INV_BASE_BULLETS_PER_ATTACK_SPEED / Configuration.BaseAttackSpeed) : (INV_BASE_BULLETS_PER_ATTACK_SPEED / attackSpeedStat);
+		// Math note: Originally calculated as (1/ShotsPerSecond)/BaseAttackSpeed
+		// This is the same as (1/ShotsPerSecond) * (1/BaseAttackSpeed)
+		// which is the same as (1/(ShotsPerSecond*BaseAttackSpeed)), which is computationally faster.
 
-		/// <summary>
-		/// How many bullets are fired per unit of Attack Speed? Note that this is lower because the survivor's default attack speed is 1.45f
-		/// </summary>
-		public const float BASE_BULLETS_PER_ATTACK_SPEED = 2.5f;
-		public const float INV_BASE_BULLETS_PER_ATTACK_SPEED = 1f / BASE_BULLETS_PER_ATTACK_SPEED;
-
-		/// <summary>
-		/// This is multiplied with the user's settings (see <see cref="Configuration.BasePrimaryProjectileCount"/>) to figure out how many shots to fire in the burst.
-		/// </summary>
-		public const float BASE_BULLETS_PER_BURST_AS_FRAC = 0.25f;
+		public float DelayBetweenShots => Configuration.ScaleDamageNotSpeed ?
+					1 / (Configuration.SpecialRageFirerateRPS * Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed) :
+					1 / (Configuration.SpecialRageFirerateRPS * attackSpeedStat);
 
 	}
 }

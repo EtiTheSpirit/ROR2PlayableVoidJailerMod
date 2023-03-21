@@ -12,13 +12,15 @@ using UnityEngine.Networking;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
+using VoidJailerMod.Initialization;
 using VoidJailerMod.XansTools;
+using Xan.ROR2VoidPlayerCharacterCommon.VRMod;
 
 namespace VoidJailerMod.Skills.Spike {
 	public class SpikeShotgunFireSequence : GenericProjectileBaseState, VRInterop.IAimRayProvider {
 
 		public static float GetMaxShotgunAdjustmentAngle() {
-			if (VRInterop.DoVRAimCompensation) {
+			if (VRInterop.DoVRAimCompensation(Configuration.VRExtendedAimCompensationBacking)) {
 				return 7f;
 			}
 			return 2.5f;
@@ -26,6 +28,10 @@ namespace VoidJailerMod.Skills.Spike {
 
 		public Ray PublicAimRay => GetAimRay();
 
+		private float _freezeAt;
+		private float _originalAnimationSpeed = 1;
+		private bool _frozeArm;
+		private bool _unfrozeArm;
 
 		public SpikeShotgunFireSequence() {
 			// projectilePrefab = ProjectileProvider.SpikeDart;
@@ -84,8 +90,7 @@ namespace VoidJailerMod.Skills.Spike {
 					force = force,
 					crit = Util.CheckRoll(critStat, characterBody.master),
 					damageColorIndex = DamageColorIndex.Void,
-					target = target,
-					useSpeedOverride = false
+					target = target
 				};
 				ProjectileManager.instance.FireProjectile(info);
 			}
@@ -94,37 +99,80 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void OnEnter() {
 			targetMuzzle = "ClawMuzzle";
 			base.OnEnter();
+
+			const float timeAtWhichShootingDone = 1f;
+			float time;
+			if (Configuration.ScaleDamageNotSpeed) {
+				time = timeAtWhichShootingDone / Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed;
+			} else {
+				time = timeAtWhichShootingDone / attackSpeedStat;
+			}
+			_freezeAt = time;
+
 			if (HasBuff(BuffProvider.Fury)) {
-				damageCoefficient *= Configuration.SpecialDamageBoost;
+				damageCoefficient *= Configuration.SpecialRageDamageBoost;
 			}
 			if (Configuration.ScaleDamageNotSpeed) {
-				duration = (1f / Configuration.BaseAttackSpeed);
-				float boost = (attackSpeedStat - Configuration.BaseAttackSpeed) + 1f;
+				duration = (1f / Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed);
+				float boost = (attackSpeedStat - Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed) + 1f;
 				if (boost >= 1) {
 					damageCoefficient *= boost;
 				}
 
-				attackSpeedStat = Configuration.BaseAttackSpeed;
+				attackSpeedStat = Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed;
 			}
 			characterBody.SetAimTimer(duration + 3f);
 			// int bullets = GetNumberOfBullets(characterBody);
 			for (int i = 1; i < Configuration.BasePrimaryProjectileCount; i++) {
 				FireProjectile();
 			}
-			priorityReductionDuration = BasePriorityReductionDuration / attackSpeedStat;
+			// priorityReductionDuration = BasePriorityReductionDuration / attackSpeedStat;
 		}
 
 		public override Ray ModifyProjectileAimRay(Ray aimRay) {
-			aimRay.origin += UnityEngine.Random.insideUnitSphere * (MaxRandomDistance * 0.8f) / (Configuration.UseFullSizeCharacter ? 1f : 2f);
+			aimRay.origin += UnityEngine.Random.insideUnitSphere * (MaxRandomDistance * 0.8f) / (Configuration.CommonVoidEnemyConfigs.UseFullSizeCharacter ? 1f : 2f);
 			return aimRay;
 		}
 
 		public override void PlayAnimation(float duration) {
+			float invMultiplier;
 			if (Configuration.ScaleDamageNotSpeed) {
-				duration = (1f / Configuration.BaseAttackSpeed);
+				duration = 1f / Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed;
+				invMultiplier = duration;
 				GetModelAnimator().SetFloat(FireAnimationPlaybackRateName, duration);
+			} else {
+				invMultiplier = 1 / attackSpeedStat;
 			}
+			_originalAnimationSpeed = GetModelAnimator().GetCurrentAnimatorStateInfo(GetModelAnimator().GetLayerIndex(FireAnimationLayerName)).length / duration;
 			PlayAnimation(FireAnimationLayerName, FireAnimationStateName, FireAnimationPlaybackRateName, duration);
+			// PlayCrossfade(FireAnimationLayerName, FireAnimationStateName, FireAnimationPlaybackRateName, duration, 2f * invMultiplier);
+		}
+
+		public override void FixedUpdate() {
+			base.FixedUpdate();
+			if (fixedAge >= _freezeAt && !_unfrozeArm) {
+				if (!_frozeArm) {
+					_frozeArm = true;
+					SetArmMovement(0f);
+				} else {
+					if (!characterBody.shouldAim) {
+						_unfrozeArm = true;
+						SetArmMovement(_originalAnimationSpeed);
+					}
+				}
+			}
+		}
+
+		private void SetArmMovement(float movement) {
+			Animator modelAnimator = GetModelAnimator();
+			if (modelAnimator) {
+				modelAnimator.SetFloat(FireAnimationPlaybackRateName, movement);
+			}
+		}
+
+		public override void OnExit() {
+			base.OnExit();
+			SetArmMovement(_originalAnimationSpeed);
 		}
 
 		public override InterruptPriority GetMinimumInterruptPriority() {
@@ -140,9 +188,5 @@ namespace VoidJailerMod.Skills.Spike {
 		public static float MaxRandomDistance => EntityStates.VoidJailer.Weapon.Fire.maxRandomDistance;
 
 		public static float BasePriorityReductionDuration => EntityStates.VoidJailer.Weapon.Fire.basePriorityReductionDuration;
-
-		private float priorityReductionDuration;
-
-		// private Transform muzzleTransform;
 	}
 }

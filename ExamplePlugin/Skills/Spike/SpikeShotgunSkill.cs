@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using VoidJailerMod.Damage;
+using VoidJailerMod.Initialization;
 using VoidJailerMod.XansTools;
+using Xan.ROR2VoidPlayerCharacterCommon.VRMod;
 
 namespace VoidJailerMod.Skills.Spike {
 	public class SpikeShotgunSkill : BaseState, VRInterop.IAimRayProvider {
@@ -15,7 +17,7 @@ namespace VoidJailerMod.Skills.Spike {
 		public override void OnEnter() {
 			base.OnEnter();
 			if (Configuration.ScaleDamageNotSpeed) {
-				attackSpeedStat = Configuration.BaseAttackSpeed;
+				attackSpeedStat = Configuration.CommonVoidEnemyConfigs.BaseAttackSpeed;
 				GetModelAnimator().SetFloat(SpikeAnimationPlaybackRateName, attackSpeedStat);
 			}
 			_totalDuration = SpikeBaseDuration / attackSpeedStat;

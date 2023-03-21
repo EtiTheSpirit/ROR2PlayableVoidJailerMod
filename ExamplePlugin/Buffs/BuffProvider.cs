@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using VoidJailerMod.Buffs.Interop;
+using VoidJailerMod.Initialization;
 using VoidJailerMod.Initialization.Sprites;
 
 namespace VoidJailerMod.Buffs {
@@ -32,7 +33,7 @@ namespace VoidJailerMod.Buffs {
 		private static void OnRecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats originalMethod, CharacterBody @this) {
 			originalMethod(@this);
 			if (@this.HasBuff(Fury)) {
-				@this.armor += Configuration.SpecialArmorBoost;
+				@this.armor += Configuration.SpecialRageArmorBoost;
 			}
 		}
 	}

@@ -7,13 +7,14 @@ using UnityEngine.AddressableAssets;
 using VoidJailerMod.Buffs;
 using VoidJailerMod.Damage;
 using VoidJailerMod.Effects;
+using VoidJailerMod.Initialization;
 using VoidJailerMod.Survivor;
 using VoidJailerMod.XansTools;
 using VRAPI;
+using Xan.ROR2VoidPlayerCharacterCommon.VRMod;
 
 namespace VoidJailerMod {
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[BepInDependency("Xan.HPBarAPI")]
 	[BepInDependency("com.DrBibop.VRAPI")]
 	[BepInDependency("Xan.VoidPlayerCharacterCommon")]
 	[BepInDependency("Xan.ExaggeratedVoidDeaths")]
@@ -25,7 +26,8 @@ namespace VoidJailerMod {
 		public const string PLUGIN_GUID = PLUGIN_AUTHOR + "." + PLUGIN_NAME;
 		public const string PLUGIN_AUTHOR = "Xan";
 		public const string PLUGIN_NAME = "VoidJailerPlayerCharacter";
-		public const string PLUGIN_VERSION = "1.3.3";
+		public const string DISPLAY_NAME = "Void Jailer Player Character";
+		public const string PLUGIN_VERSION = "2.0.0";
 		
 		public void Awake() {
 			Log.Init(Logger);

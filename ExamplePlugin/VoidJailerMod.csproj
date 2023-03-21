@@ -80,9 +80,6 @@
     <Reference Include="RiskOfOptions">
       <HintPath>..\..\ROR2SacrificeDropLimiter\SacrificeDropLimiter\libs\RiskOfOptions.dll</HintPath>
     </Reference>
-    <Reference Include="ROR2HPBarAPI">
-      <HintPath>..\..\ROR2HPBarAPI\ROR2HPBarAPI\bin\Release\netstandard2.0\ROR2HPBarAPI.dll</HintPath>
-    </Reference>
     <Reference Include="ROR2VoidPlayerCharacterCommon">
       <HintPath>..\..\ROR2VoidPlayerCharacterCommon\ROR2VoidPlayerCharacterCommon\bin\Release\netstandard2.0\ROR2VoidPlayerCharacterCommon.dll</HintPath>
     </Reference>

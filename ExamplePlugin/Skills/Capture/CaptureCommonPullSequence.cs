@@ -9,6 +9,8 @@ using System.Linq;
 using VoidJailerMod.Skills.Spike;
 using UnityEngine.AddressableAssets;
 using VoidJailerMod.XansTools;
+using Xan.ROR2VoidPlayerCharacterCommon.VRMod;
+using VoidJailerMod.Initialization;
 
 namespace VoidJailerMod.Skills.Capture {
 	public class CaptureCommonPullSequence : BaseState, VRInterop.IAimRayProvider {
@@ -114,7 +116,7 @@ namespace VoidJailerMod.Skills.Capture {
 
 		public string EnterSoundString { get; } = "Play_voidJailer_m2_shoot";
 
-		public float PullFieldOfView => VRInterop.DoVRAimCompensation ? 22.5f : 17.5f;
+		public float PullFieldOfView => VRInterop.DoVRAimCompensation(Configuration.VRExtendedAimCompensationBacking) ? 22.5f : 17.5f;
 
 		public float PullMinDistance { get; } = 1f;
 

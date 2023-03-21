@@ -8,6 +8,8 @@ using UnityEngine;
 using RoR2;
 using BlinkState = EntityStates.ImpMonster.BlinkState;
 using VoidJailerMod.XansTools;
+using Xan.ROR2VoidPlayerCharacterCommon.VRMod;
+using VoidJailerMod.Initialization;
 
 namespace VoidJailerMod.Skills.Dive {
 

@@ -93,6 +93,26 @@ namespace VoidJailerMod.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Generic_Warning {
+            get {
+                object obj = ResourceManager.GetObject("Generic_Warning", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Mortar {
+            get {
+                object obj = ResourceManager.GetObject("Mortar", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Perforate {
             get {
                 object obj = ResourceManager.GetObject("Perforate", resourceCulture);

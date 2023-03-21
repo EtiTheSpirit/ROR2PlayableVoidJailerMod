@@ -9,6 +9,18 @@ using UnityEngine;
 namespace VoidJailerMod.Initialization.Sprites {
 	public static class Images {
 
+		public static Sprite GenericWarning {
+			get {
+				if (_genericWarning == null) {
+					using (MemoryStream stream = new MemoryStream(Properties.Resources.Generic_Warning)) {
+						_genericWarning = ImageHelper.CreateSprite(stream);
+					}
+				}
+				return _genericWarning;
+			}
+		}
+		private static Sprite _genericWarning = null;
+
 		public static Sprite Portrait {
 			get {
 				if (_portrait == null) {
@@ -84,6 +96,18 @@ namespace VoidJailerMod.Initialization.Sprites {
 			}
 		}
 		private static Sprite _wardensFuryBuffIcon = null;
+
+		public static Sprite MortarIcon {
+			get {
+				if (_mortarIcon == null) {
+					using (MemoryStream stream = new MemoryStream(Properties.Resources.Mortar)) {
+						_mortarIcon = ImageHelper.CreateSprite(stream);
+					}
+				}
+				return _mortarIcon;
+			}
+		}
+		private static Sprite _mortarIcon = null;
 
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using System.Diagnostics;
 using System.Reflection;
+using VoidJailerMod.Initialization;
 
 namespace VoidJailerMod {
 	internal static class Log {
@@ -19,7 +20,7 @@ namespace VoidJailerMod {
 		/// </summary>
 		/// <param name="data"></param>
 		internal static void LogTrace(object data) {
-			if (!Configuration.TraceLogging) return;
+			if (!Configuration.CommonVoidEnemyConfigs.TraceLogging) return;
 			StackTrace stack = new StackTrace();
 			StackFrame super = stack.GetFrame(1);
 			MethodBase caller = super.GetMethod();
